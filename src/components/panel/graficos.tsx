@@ -8,10 +8,10 @@ import { eur, eurEje, fecha, marcasEje, MESES, mayuscula, nombreMes } from "@/li
 export const COLOR_INGRESOS = "#4B7A2F";
 export const COLOR_GASTO = "#E0895E";
 const COLOR_AHORRO = "#607456";
-const REJILLA = "#E6D6BF";
-const TEXTO_EJE = { fill: "#857B69", fontSize: 11 };
+export const REJILLA = "#E6D6BF";
+export const TEXTO_EJE = { fill: "#857B69", fontSize: 11 };
 
-function Leyenda({ items }: { items: { color: string; texto: string }[] }) {
+export function Leyenda({ items }: { items: { color: string; texto: string }[] }) {
   return (
     <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-tinta-2">
       {items.map((i) => (
@@ -24,7 +24,7 @@ function Leyenda({ items }: { items: { color: string; texto: string }[] }) {
   );
 }
 
-function Globo({ titulo, filas }: { titulo: string; filas: { color: string; texto: string; valor: number }[] }) {
+export function Globo({ titulo, filas }: { titulo: string; filas: { color: string; texto: string; valor: number }[] }) {
   return (
     <div className="rounded-lg border border-linea bg-campo px-3 py-2 text-xs shadow-md">
       <p className="mb-1 font-bold text-tinta">{titulo}</p>
@@ -40,7 +40,7 @@ function Globo({ titulo, filas }: { titulo: string; filas: { color: string; text
 }
 
 /** Tabla equivalente al gráfico, para leer los valores exactos. */
-function ComoTabla({ cabecera, filas }: { cabecera: string[]; filas: (string | number)[][] }) {
+export function ComoTabla({ cabecera, filas }: { cabecera: string[]; filas: (string | number)[][] }) {
   return (
     <details className="mt-2 text-xs">
       <summary className="cursor-pointer font-semibold text-oliva-osc">Ver como tabla</summary>
@@ -70,7 +70,7 @@ function ComoTabla({ cabecera, filas }: { cabecera: string[]; filas: (string | n
   );
 }
 
-const ejeEuros = (v: number) => eurEje(v).replace(" €", "");
+export const ejeEuros = (v: number) => eurEje(v).replace(" €", "");
 
 /** Ingresos frente a gasto total, mes a mes del año. */
 export function GraficoIngresosGastos({ datos, mesActual }: { datos: { mes: string; ingresos: number; gasto: number }[]; mesActual: string }) {

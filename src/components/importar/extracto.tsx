@@ -126,7 +126,7 @@ export function ImportarExtracto({ grupos }: { grupos: Grupo[] }) {
         desmarcado. Revisa cada línea antes de guardar.
       </p>
       <div className="flex flex-wrap items-center gap-3">
-        <input ref={input} type="file" accept=".csv,.txt,.xlsx" className="sr-only" id="extracto-archivo" onChange={(e) => e.target.files?.[0] && elegir(e.target.files[0])} />
+        <input ref={input} type="file" accept=".csv,.txt,.xlsx" className="sr-only" id="extracto-archivo" tabIndex={-1} aria-label="Archivo del extracto" onChange={(e) => e.target.files?.[0] && elegir(e.target.files[0])} />
         <Button variant="outline" disabled={enviando} onClick={() => input.current?.click()}>
           <FileUp /> {extracto ? "Elegir otro extracto" : "Elegir el extracto (.csv o .xlsx)"}
         </Button>

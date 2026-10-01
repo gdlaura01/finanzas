@@ -16,7 +16,7 @@ const SECCIONES: Seccion[] = [
   { ruta: "/movimientos", nombre: "Movimientos", corto: "Movs.", icono: Lista, lista: true },
   { ruta: "/presupuesto", nombre: "Presupuesto", corto: "Presup.", icono: Euro, lista: true },
   { ruta: "/calendario", nombre: "Calendario anual", corto: "Calend.", icono: CalendarDays, lista: true },
-  { ruta: "/cuentas", nombre: "Cuentas y ahorro", corto: "Cuentas", icono: TrendingUp },
+  { ruta: "/cuentas", nombre: "Cuentas y ahorro", corto: "Cuentas", icono: TrendingUp, lista: true },
   { ruta: "/revisar", nombre: "Revisar carga inicial", corto: "Revisar", icono: ListChecks, lista: true },
   { ruta: "/ajustes", nombre: "Ajustes", corto: "Ajustes", icono: Settings, lista: true },
 ];
