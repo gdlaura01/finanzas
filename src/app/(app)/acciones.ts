@@ -3,11 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/db";
 import * as m from "@/db/movimientos";
-import { exigirSesion } from "@/lib/auth/exigir";
+import { conSesion, type Resultado as ResultadoBase } from "@/lib/auth/exigir";
 import { esFechaISO, esMes, eur, leerImporte } from "@/lib/formato";
 import { CLASES, claseDe, validarMovimiento, type DatosMovimiento, type EntradaFormulario, type Errores } from "@/lib/movimientos";
 
-export type Resultado = { ok: true; mensaje: string; id?: number } | { ok: false; error?: string; errores?: Errores };
+type Resultado = ResultadoBase<Errores>;
 
 const CAMPOS = ["clase", "entradaComo", "fechaCompra", "fechaCargo", "concepto", "importe", "grupoId", "medio", "etiqueta", "notas", "cuentaDestino", "cubrirConHucha", "cuentaOrigenActual", "cuentaDestinoActual"] as const;
 const leer = (f: FormData): EntradaFormulario => Object.fromEntries(CAMPOS.map((k) => [k, f.get(k)?.toString() ?? undefined]));
@@ -16,19 +16,10 @@ function refrescar() {
   revalidatePath("/", "layout");
 }
 
-async function seguro(fn: () => Resultado | Promise<Resultado>): Promise<Resultado> {
-  try {
-    await exigirSesion();
-    return await fn();
-  } catch (e) {
-    return { ok: false, error: (e as Error).message };
-  }
-}
-
 const resumen = (d: DatosMovimiento) => `${d.concepto} · ${CLASES[claseDe(d)].toLowerCase()} de ${eur(Math.abs(d.importeCent))}`;
 
 export async function registrarMovimiento(f: FormData): Promise<Resultado> {
-  return seguro(() => {
+  return conSesion<Errores>(() => {
     const base = db();
     const r = validarMovimiento(leer(f), m.gruposActivos(base).map((g) => g.id));
     if (!r.ok) return r;
@@ -41,7 +32,7 @@ export async function registrarMovimiento(f: FormData): Promise<Resultado> {
 }
 
 export async function editarMovimiento(id: number, f: FormData): Promise<Resultado> {
-  return seguro(() => {
+  return conSesion<Errores>(() => {
     const base = db();
     // Un movimiento antiguo puede estar en un grupo ya archivado: también vale.
     const r = validarMovimiento(leer(f), m.todosLosGrupos(base).map((g) => g.id));
@@ -54,7 +45,7 @@ export async function editarMovimiento(id: number, f: FormData): Promise<Resulta
 }
 
 export async function borrarMovimiento(id: number): Promise<Resultado> {
-  return seguro(() => {
+  return conSesion<Errores>(() => {
     const r = m.borrarMovimiento(db(), id);
     refrescar();
     return { ok: true, mensaje: r ? `Borrado: ${r.concepto}` : "Ese movimiento ya no estaba" };
@@ -62,7 +53,7 @@ export async function borrarMovimiento(id: number): Promise<Resultado> {
 }
 
 export async function confirmarPendiente(f: FormData): Promise<Resultado> {
-  return seguro(() => {
+  return conSesion<Errores>(() => {
     const recurrenteId = Number(f.get("recurrenteId"));
     const periodo = String(f.get("periodo") ?? "");
     const fecha = String(f.get("fecha") ?? "");
@@ -78,7 +69,7 @@ export async function confirmarPendiente(f: FormData): Promise<Resultado> {
 }
 
 export async function omitirPendiente(recurrenteId: number, periodo: string): Promise<Resultado> {
-  return seguro(() => {
+  return conSesion<Errores>(() => {
     if (!esMes(periodo)) return { ok: false, error: "Mes no válido." };
     const r = m.omitirRecurrente(db(), recurrenteId, periodo);
     refrescar();
@@ -87,7 +78,7 @@ export async function omitirPendiente(recurrenteId: number, periodo: string): Pr
 }
 
 export async function cambiarDiaPrevisto(recurrenteId: number, texto: string): Promise<Resultado> {
-  return seguro(() => {
+  return conSesion<Errores>(() => {
     const t = texto.trim();
     const dia = t ? Number(t) : null;
     if (dia != null && !(Number.isInteger(dia) && dia >= 1 && dia <= 31)) return { ok: false, error: "Escribe un día del 1 al 31, o déjalo vacío." };

@@ -2,7 +2,7 @@
 
 Aplicación de finanzas personales para usar en tu propio ordenador. Los datos viven en un archivo SQLite local (`data/finanzas.db`); nada sale a la nube salvo la copia de seguridad en tu Google Drive.
 
-> Estado: **fase 4** (acceso, registro de movimientos y panel). El presupuesto, el calendario y el resto de pantallas llegan en las fases siguientes.
+> Estado: **fase 5** (acceso, movimientos, panel, presupuesto y calendario anual). Cuentas, importadores, Drive y avisos llegan en las fases siguientes.
 
 ## Requisitos
 
@@ -66,6 +66,11 @@ Solo lectura, para leer de un vistazo (de arriba abajo y de izquierda a derecha)
 - **Resumen del mes**, **semáforo por grupo** (presupuesto fijo + eventos del mes), **reparto del gasto**, **ingresos frente a gastos** del año y **ahorro acumulado** desde el saldo de partida. Cada gráfico tiene su versión en tabla.
 - **Pendientes**, **próximos eventos** y **últimos movimientos** (el lápiz abre el movimiento ya en edición). En meses pasados, además, el **cierre** frente al mes anterior.
 
+## Presupuesto y calendario
+
+- **Presupuesto**: el margen del plan de cada mes (nómina − traspaso a Trade Republic − hucha − lo que el presupuesto de los grupos pide a la nómina, es decir, sin la parte prevista en efectivo), la nómina y los importes habituales de ahorro, y el presupuesto de cada grupo con su parte en efectivo. Todo se guarda al salir de cada casilla.
+- **Calendario anual**: próximos 12 meses o año natural. Cada evento tiene grupo, etiqueta, color, día opcional y puede ser «solo este año». Su importe se suma al presupuesto de su grupo ese mes (Regalos solo tiene eventos). Lo gastado con su etiqueta cuenta como gastado en el evento. Los eventos sin mes esperan en su bandeja.
+
 ## Base de datos
 
 | Orden | Qué hace |
@@ -100,6 +105,8 @@ Además, la app mantendrá un libro `.xlsx` en tu Google Drive con los datos ya 
 npm test          # pruebas
 npm run tipos     # comprobación de tipos
 ```
+
+Las pruebas del presupuesto y el calendario están en `src/lib/plan.test.ts` y `src/db/plan.test.ts`: margen del plan con eventos y efectivo, meses del calendario, eventos de un solo año, validación de eventos y etiquetas, y parámetros del plan.
 
 Las pruebas del panel están en `src/lib/panel.test.ts`: resumen con gasolina y efectivo, presupuesto por grupo con eventos, avisos, próximos eventos, saldos de las cuentas, ahorro acumulado, rendimiento de Inversión TR y cierre del mes.
 

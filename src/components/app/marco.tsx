@@ -12,8 +12,8 @@ type Seccion = { ruta: string; nombre: string; corto: string; icono: React.Eleme
 const SECCIONES: Seccion[] = [
   { ruta: "/", nombre: "Panel", corto: "Panel", icono: LayoutGrid, lista: true },
   { ruta: "/movimientos", nombre: "Movimientos", corto: "Movs.", icono: Lista, lista: true },
-  { ruta: "/presupuesto", nombre: "Presupuesto", corto: "Presup.", icono: Euro },
-  { ruta: "/calendario", nombre: "Calendario anual", corto: "Calend.", icono: CalendarDays },
+  { ruta: "/presupuesto", nombre: "Presupuesto", corto: "Presup.", icono: Euro, lista: true },
+  { ruta: "/calendario", nombre: "Calendario anual", corto: "Calend.", icono: CalendarDays, lista: true },
   { ruta: "/cuentas", nombre: "Cuentas y ahorro", corto: "Cuentas", icono: TrendingUp },
   { ruta: "/revisar", nombre: "Revisar carga inicial", corto: "Revisar", icono: ListChecks },
   { ruta: "/ajustes", nombre: "Ajustes", corto: "Ajustes", icono: Settings },
