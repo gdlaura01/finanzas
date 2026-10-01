@@ -2,7 +2,7 @@
 
 Aplicación de finanzas personales para usar en tu propio ordenador. Los datos viven en un archivo SQLite local (`data/finanzas.db`); nada sale a la nube salvo la copia de seguridad en tu Google Drive.
 
-> Estado: **fase 5** (acceso, movimientos, panel, presupuesto y calendario anual). Cuentas, importadores, Drive y avisos llegan en las fases siguientes.
+> Estado: **fase 6** (acceso, movimientos, panel, presupuesto, calendario e importadores). Drive, avisos y pulido llegan en las fases siguientes.
 
 ## Requisitos
 
@@ -71,6 +71,15 @@ Solo lectura, para leer de un vistazo (de arriba abajo y de izquierda a derecha)
 - **Presupuesto**: el margen del plan de cada mes (nómina − traspaso a Trade Republic − hucha − lo que el presupuesto de los grupos pide a la nómina, es decir, sin la parte prevista en efectivo), la nómina y los importes habituales de ahorro, y el presupuesto de cada grupo con su parte en efectivo. Todo se guarda al salir de cada casilla.
 - **Calendario anual**: próximos 12 meses o año natural. Cada evento tiene grupo, etiqueta, color, día opcional y puede ser «solo este año». Su importe se suma al presupuesto de su grupo ese mes (Regalos solo tiene eventos). Lo gastado con su etiqueta cuenta como gastado en el evento. Los eventos sin mes esperan en su bandeja.
 
+## Importar
+
+En **Movimientos › Importar extracto** (o en `/importar`):
+
+- **Carga inicial** (una sola vez): descarga tu hoja «Seguimiento Financiero» como Excel y súbela. Se cargan la nómina y los traspasos a Trade Republic del resumen mensual, los gastos fijos hasta que empiezan los recurrentes, los gastos variables y la gasolina con la fecha real de tu hoja de gasolina; los repostajes que no aparecen en la cuenta se marcan como efectivo. Lo que ya estuviera en la app no se repite. Después, en **Revisar carga inicial**, confirmas el día de cada nómina y clasificas los gastos por concepto (una decisión vale para todos los apuntes iguales), con excepciones por apunte y «Deshacer».
+- **Extracto del banco** (CSV o Excel): las columnas se proponen solas y puedes cambiarlas; se recuerdan con un nombre («Imagin») para la próxima vez. La fecha de la operación es la de compra y la fecha valor, la de cargo. Cada línea llega con su tipo y una propuesta de grupo (lo aprendido de tus apuntes o tus reglas). Lo que se parece a algo que ya tienes (mismo importe y cargo a 2 días o menos) llega desmarcado como «posible duplicado». Si corriges un grupo, te ofrece crear una regla.
+
+Los archivos se leen en tu ordenador y no se guardan; `*.xlsx`, `*.csv` y `data/importar/` están en `.gitignore`.
+
 ## Base de datos
 
 | Orden | Qué hace |
@@ -105,6 +114,8 @@ Además, la app mantendrá un libro `.xlsx` en tu Google Drive con los datos ya 
 npm test          # pruebas
 npm run tipos     # comprobación de tipos
 ```
+
+Las pruebas de los importadores están en `src/lib/importar/*.test.ts` y `src/db/importar.test.ts`, con una hoja y un extracto de ejemplo que tienen la misma forma que los reales: lectura de la hoja (gasolina con fecha real y efectivo deducido), CSV y mapeo de columnas, fechas, duplicados, propuestas, revisión por lotes y deshacer.
 
 Las pruebas del presupuesto y el calendario están en `src/lib/plan.test.ts` y `src/db/plan.test.ts`: margen del plan con eventos y efectivo, meses del calendario, eventos de un solo año, validación de eventos y etiquetas, y parámetros del plan.
 
