@@ -16,7 +16,9 @@
     "tipos": "tsc --noEmit",
     "predev": "npm run db:preparar && tsx scripts/direcciones.ts",
     "prestart": "npm run db:migrar && tsx scripts/direcciones.ts",
-    "crear-acceso": "tsx scripts/crear-acceso.ts"
+    "crear-acceso": "tsx scripts/crear-acceso.ts",
+    "abrir": "tsx scripts/lanzador.ts",
+    "acceso-directo": "tsx scripts/acceso-directo.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.23",

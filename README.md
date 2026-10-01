@@ -26,6 +26,22 @@ npm run build && npm start   # versión optimizada
 
 `npm run dev` prepara la base de datos antes de arrancar; `npm start` aplica las migraciones pendientes.
 
+## Abrir con un doble clic (Windows)
+
+Para no usar la terminal: un icono «Finanzas» que abre la app y la cierra sola cuando dejas de usarla.
+
+1. Una sola vez, tras la instalación: `npm run acceso-directo`. Crea el icono en el **escritorio** y en el **menú Inicio** (desde allí, clic derecho › *Anclar a la barra de tareas* si lo quieres abajo).
+2. **Doble clic** en el icono: se abre el navegador con «Abriendo Finanzas…» y, en unos segundos, la app. No verás ninguna ventana de terminal.
+3. Úsala con normalidad. Mientras tengas una pestaña abierta (en el ordenador o en el móvil) sigue en marcha; **15 minutos después de cerrar la última, se cierra sola**. Si había una copia a Drive a medias, espera a que termine (y si no hay internet, la retoma la próxima vez que la abras).
+4. Si vuelves a una pestaña antigua después de que se haya cerrado, no responderá: haz doble clic en el icono otra vez.
+
+Detalles:
+
+- **Actualizar**: `git pull` y doble clic. El icono detecta la versión nueva, instala lo que falte y la compila él solo; esa primera vez tarda un par de minutos.
+- **Recurrentes que se apuntan solos**: se registran al abrir la app, con su fecha correcta.
+- **Si no se abre**, la página de espera lo dice, y el detalle queda en `data/lanzador.log`. Si otro programa usa el puerto 3000, pon otro en `PORT` dentro de `.env.local`.
+- Para quitar el icono, bórralo del escritorio y del menú Inicio. `npm start` sigue funcionando igual (y así no se cierra sola).
+
 ## Usar desde el móvil (en casa)
 
 La app sigue viviendo en tu ordenador; el móvil solo la abre a través de la wifi de casa.

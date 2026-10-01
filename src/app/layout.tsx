@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Figtree } from "next/font/google";
+import { Latido } from "@/components/app/latido";
 import "./globals.css";
 
 const figtree = Figtree({ variable: "--font-figtree", subsets: ["latin"] });
@@ -17,7 +18,10 @@ export const viewport: Viewport = { themeColor: "#607456" };
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es">
-      <body className={`${figtree.variable} ${bricolage.variable}`}>{children}</body>
+      <body className={`${figtree.variable} ${bricolage.variable}`}>
+        {children}
+        <Latido />
+      </body>
     </html>
   );
 }

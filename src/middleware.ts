@@ -19,6 +19,6 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  // El manifiesto y el icono se piden sin sesión al añadir la app a la pantalla de inicio
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icono/|manifest.webmanifest|.*\\.(?:png|jpg|svg|ico|webmanifest)$).*)"],
+  // Sin sesión: el manifiesto y el icono (al añadir la app al móvil) y el latido (también en la pantalla de acceso)
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icono/|manifest.webmanifest|api/latido|.*\\.(?:png|jpg|svg|ico|webmanifest)$).*)"],
 };

@@ -1,0 +1,2 @@
+# El icono de Windows necesita finales de línea CRLF
+*.vbs text eol=crlf
