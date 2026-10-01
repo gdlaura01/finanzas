@@ -7,7 +7,7 @@ import * as t from "@/db/schema";
 import { conSesion, type Resultado } from "@/lib/auth/exigir";
 import { trasCambio } from "@/lib/cambios";
 import { hoy } from "@/lib/formato";
-import { mesDeInicio, mover, palabrasAPatron, validarAtajo, validarGrupo, validarRecurrente } from "@/lib/ajustes";
+import { mover, palabrasAPatron, validarAtajo, validarGrupo, validarRecurrente } from "@/lib/ajustes";
 
 type Form = Record<string, string | undefined>;
 const idsGruposActivos = () => db().select({ id: t.grupos.id }).from(t.grupos).where(eq(t.grupos.activo, true)).all().map((g) => g.id);
@@ -31,7 +31,8 @@ export async function guardarRecurrente(id: number | null, f: Form): Promise<Res
       aj.editarRecurrente(base, r.id, v.datos);
       return hecho(`«${v.datos.concepto}» guardado`);
     }
-    return hecho(`«${v.datos.concepto}» añadido`, aj.crearRecurrente(base, v.datos, mesDeInicio(v.datos.dia, hoy())));
+    // Cuenta desde el mes en curso, aunque su día ya haya pasado
+    return hecho(`«${v.datos.concepto}» añadido`, aj.crearRecurrente(base, v.datos, hoy().slice(0, 7)));
   });
 }
 

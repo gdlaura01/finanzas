@@ -2,7 +2,7 @@
  * Ajustes: validación de recurrentes, atajos, grupos y reglas, y su orden. Funciones puras.
  */
 import { MEDIOS, type Medio } from "@/db/schema";
-import { leerImporte, sumarMeses } from "./formato";
+import { leerImporte } from "./formato";
 import { MEDIO_POR_CLASE, type ClaseForm } from "./movimientos";
 import { normalizar } from "./reglas";
 
@@ -85,15 +85,6 @@ export function validarRecurrente(
       activo: f.activo !== "off",
     },
   };
-}
-
-/**
- * Mes desde el que cuenta un recurrente nuevo: este mes, salvo que su día ya haya pasado
- * (lo de este mes ya lo habrás apuntado a mano); entonces, el que viene.
- */
-export function mesDeInicio(dia: number | null, hoyISO: string) {
-  const mes = hoyISO.slice(0, 7);
-  return dia != null && dia < Number(hoyISO.slice(8, 10)) ? sumarMeses(mes, 1) : mes;
 }
 
 /* ---------- Atajos ---------- */

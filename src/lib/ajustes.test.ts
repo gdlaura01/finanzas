@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mesDeInicio, mover, palabrasAPatron, patronAEditable, patronAPalabras, validarAtajo, validarGrupo, validarRecurrente } from "./ajustes";
+import { mover, palabrasAPatron, patronAEditable, patronAPalabras, validarAtajo, validarGrupo, validarRecurrente } from "./ajustes";
 import { sugerir } from "./reglas";
 
 describe("orden", () => {
@@ -35,12 +35,6 @@ describe("recurrentes", () => {
     if (!r.ok) expect(Object.keys(r.errores).sort()).toEqual(["clase", "dia"]);
     const g = validarRecurrente({ concepto: "x", clase: "gasto", grupoId: "99" }, ctx);
     expect(!g.ok && g.errores.grupoId).toBeTruthy();
-  });
-  it("empieza este mes, o el siguiente si su día ya ha pasado", () => {
-    expect(mesDeInicio(15, "2026-10-01")).toBe("2026-10");
-    expect(mesDeInicio(15, "2026-10-15")).toBe("2026-10");
-    expect(mesDeInicio(5, "2026-12-20")).toBe("2027-01");
-    expect(mesDeInicio(null, "2026-10-20")).toBe("2026-10");
   });
   it("apagado con «activo» en off; el medio por defecto según el tipo", () => {
     const r = validarRecurrente({ concepto: "Hucha extra", clase: "hucha", importe: "20", activo: "off" }, ctx);

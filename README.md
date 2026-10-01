@@ -88,7 +88,7 @@ Solo lectura, para leer de un vistazo (de arriba abajo y de izquierda a derecha)
 
 ## Ajustes
 
-- **Recurrentes**: lo que se repite cada mes. «Se apunta solo» lo registra el día que toca (necesita día e importe); si no, te espera en *Pendientes*. Uno nuevo empieza este mes, o el que viene si su día ya pasó. Los de la app (nómina, traspasos, intereses, valor de la inversión) se pueden editar o desactivar, pero no borrar; la nómina y los traspasos cambian su importe en Presupuesto. Borrar un recurrente no borra los movimientos que ya apuntó.
+- **Recurrentes**: lo que se repite cada mes. «Se apunta solo» lo registra el día que toca (necesita día e importe); si no, te espera en *Pendientes*. Uno nuevo cuenta desde este mes, aunque su día ya haya pasado: si «se apunta solo» se registra al momento; si no, sale en *Pendientes*. Los de la app (nómina, traspasos, intereses, valor de la inversión) se pueden editar o desactivar, pero no borrar; la nómina y los traspasos cambian su importe en Presupuesto. Borrar un recurrente no borra los movimientos que ya apuntó.
 - **Atajos**: los botones de «Registrar». Texto, concepto, tipo, grupo, medio e importe (vacío = lo escribes al usarlo). Allí salen primero los más usados; a igualdad, en el orden de aquí.
 - **Grupos**: nombre, color y orden; uno nuevo se coloca antes de «Otros». Un grupo con movimientos (o usado en eventos, atajos, recurrentes o reglas) no se borra: se archiva y se puede reactivar.
 - **Reglas**: proponen el grupo al importar. Palabras separadas por comas, sin importar mayúsculas ni tildes (`^bar` = empieza por «bar», `^hm$` = exactamente «hm»). Se miran de arriba abajo; una nueva va la primera. «Prueba un concepto» te dice qué regla lo clasificaría.
