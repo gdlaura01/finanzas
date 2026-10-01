@@ -2,7 +2,7 @@
 
 Aplicación de finanzas personales para usar en tu propio ordenador. Los datos viven en un archivo SQLite local (`data/finanzas.db`); nada sale a la nube salvo la copia de seguridad en tu Google Drive.
 
-> Estado: **fase 6** (acceso, movimientos, panel, presupuesto, calendario e importadores). Drive, avisos y pulido llegan en las fases siguientes.
+> Estado: **fase 7** (acceso, movimientos, panel, presupuesto, calendario, importadores y copia en Google Drive). Avisos y pulido llegan en las fases siguientes.
 
 ## Requisitos
 
@@ -34,7 +34,9 @@ npm run build && npm start   # versión optimizada
 | `APP_EMAIL`, `APP_PASSWORD_HASH` | Tu acceso. El hash es bcrypt; nunca la contraseña en claro. |
 | `SESSION_SECRET` | Secreto para firmar la cookie de sesión (32 caracteres o más). |
 | `COOKIE_SECURE` | `true` solo si sirves la app por https. En `http://localhost`, déjalo en `false`. |
-| `GOOGLE_CREDENTIALS_PATH` | Credenciales OAuth de Google Drive (fase 7), fuera del repositorio. |
+| `GOOGLE_CREDENTIALS_PATH` | JSON del cliente OAuth de Google, fuera del repositorio (admite `~`). |
+| `GOOGLE_TOKEN_PATH` | Opcional. Dónde se guarda el permiso de Google. Por defecto, `~/.config/finanzas/google-token.json`. |
+| `DRIVE_NOMBRE_ARCHIVO` | Opcional. Nombre del libro en tu Drive. |
 
 ## Acceso
 
@@ -106,7 +108,22 @@ sqlite3 data/finanzas.db ".backup 'data/copias/finanzas-$(date +%F).db'"
 
 **Restaurar**: cierra la app, borra `data/finanzas.db`, `data/finanzas.db-wal` y `data/finanzas.db-shm`, y copia la copia elegida como `data/finanzas.db`. Al arrancar se aplicarán las migraciones que falten.
 
-Además, la app mantendrá un libro `.xlsx` en tu Google Drive con los datos ya calculados (fase 7).
+También puedes descargar en cualquier momento el libro `.xlsx` con los datos calculados desde **Ajustes › Copia local**.
+
+## Copia en Google Drive
+
+Tras cada cambio (con unos segundos de margen para agrupar), la app genera un libro `.xlsx` con cinco hojas de valores ya calculados (Resumen, Movimientos, Presupuesto, Anuales y Ahorro) y **sobrescribe siempre el mismo archivo** de tu Drive por su `fileId`. Si no hay internet o Drive falla, lo deja pendiente y reintenta con espera creciente (10 s, 20 s, 40 s… hasta 30 min); al arrancar la app retoma lo pendiente. Nunca impide guardar. El indicador de abajo a la izquierda (arriba en el móvil) dice si está sincronizado, pendiente o con error, con un botón para reintentar.
+
+**Configurarlo (una vez):**
+
+1. En [Google Cloud Console](https://console.cloud.google.com/) crea un proyecto (gratis) y activa la **Google Drive API** (APIs y servicios › Biblioteca).
+2. En **Pantalla de consentimiento de OAuth**, tipo «Externo», añade tu correo como usuario de prueba. No hace falta publicarla.
+3. En **Credenciales › Crear credenciales › ID de cliente de OAuth**, tipo **Aplicación web**, con este URI de redirección autorizado: `http://localhost:3000/api/drive/callback` (si usas otro puerto, cámbialo).
+4. Descarga el JSON y guárdalo **fuera de esta carpeta**, por ejemplo en `~/.config/finanzas/google-oauth.json`, con permisos solo para ti (`chmod 600`).
+5. Pon su ruta en `GOOGLE_CREDENTIALS_PATH` dentro de `.env.local` y reinicia la app.
+6. En **Ajustes › Copia en Google Drive**, pulsa **Conectar con Google Drive** y acepta.
+
+La app solo pide el permiso `drive.file`: ve el archivo que ella crea, no el resto de tu Drive. El permiso duradero (refresh token) se guarda en `~/.config/finanzas/google-token.json` (fuera del repositorio, permisos 600). Para retirarlo: **Desconectar** en Ajustes, o quita el acceso desde tu cuenta de Google. Si borras el archivo en Drive, la app crea otro en la siguiente copia.
 
 ## Pruebas
 
@@ -114,6 +131,8 @@ Además, la app mantendrá un libro `.xlsx` en tu Google Drive con los datos ya 
 npm test          # pruebas
 npm run tipos     # comprobación de tipos
 ```
+
+Las pruebas de la copia en Drive están en `src/lib/drive/*.test.ts`: las cinco hojas del libro (solo valores, formato, importes con signo), agrupar cambios, reintentos con espera creciente, error permanente, retomar al arrancar, y el cliente de Google con respuestas simuladas.
 
 Las pruebas de los importadores están en `src/lib/importar/*.test.ts` y `src/db/importar.test.ts`, con una hoja y un extracto de ejemplo que tienen la misma forma que los reales: lectura de la hoja (gasolina con fecha real y efectivo deducido), CSV y mapeo de columnas, fechas, duplicados, propuestas, revisión por lotes y deshacer.
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { trasCambio } from "@/lib/cambios";
 import { db } from "@/db";
 import * as imp from "@/db/importar";
 import { gruposActivos, todosLosGrupos, ultimosPorConcepto } from "@/db/movimientos";
@@ -12,7 +12,7 @@ import { aFormulario, aplicarMapeo, leerCSV, proponerLineas, proponerMapeo, type
 import { leerHojaSeguimiento, type Celda } from "@/lib/importar/hoja";
 import { validarMovimiento } from "@/lib/movimientos";
 
-const refrescar = () => revalidatePath("/", "layout");
+const refrescar = trasCambio;
 const MAX = 10 * 1024 * 1024;
 
 async function archivoDe(f: FormData) {

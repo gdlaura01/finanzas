@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { trasCambio } from "@/lib/cambios";
 import { db } from "@/db";
 import * as m from "@/db/movimientos";
 import { conSesion, type Resultado as ResultadoBase } from "@/lib/auth/exigir";
@@ -12,9 +12,7 @@ type Resultado = ResultadoBase<Errores>;
 const CAMPOS = ["clase", "entradaComo", "fechaCompra", "fechaCargo", "concepto", "importe", "grupoId", "medio", "etiqueta", "notas", "cuentaDestino", "cubrirConHucha", "cuentaOrigenActual", "cuentaDestinoActual"] as const;
 const leer = (f: FormData): EntradaFormulario => Object.fromEntries(CAMPOS.map((k) => [k, f.get(k)?.toString() ?? undefined]));
 
-function refrescar() {
-  revalidatePath("/", "layout");
-}
+const refrescar = trasCambio;
 
 const resumen = (d: DatosMovimiento) => `${d.concepto} · ${CLASES[claseDe(d)].toLowerCase()} de ${eur(Math.abs(d.importeCent))}`;
 
