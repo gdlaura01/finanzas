@@ -9,6 +9,8 @@ const clave = (id: string) => `finanzas:plegable:${id}`;
 export function Plegable({ id, titulo, resumen, abiertoPorDefecto = false, children }: { id: string; titulo: string; resumen?: React.ReactNode; abiertoPorDefecto?: boolean; children: React.ReactNode }) {
   const [abierto, setAbierto] = useState(abiertoPorDefecto);
   useEffect(() => {
+    // Un enlace a #id la abre siempre; si no, como la dejaste.
+    if (window.location.hash === `#${id}`) return setAbierto(true);
     try {
       const v = localStorage.getItem(clave(id));
       if (v != null) setAbierto(v === "1");
@@ -16,6 +18,7 @@ export function Plegable({ id, titulo, resumen, abiertoPorDefecto = false, child
   }, [id]);
   return (
     <details
+      id={id}
       open={abierto}
       onToggle={(e) => {
         const v = (e.currentTarget as HTMLDetailsElement).open;

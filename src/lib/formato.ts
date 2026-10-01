@@ -84,3 +84,29 @@ export const esMes = (s: unknown): s is string => typeof s === "string" && /^\d{
 export function hoy(ahora = new Date()) {
   return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Madrid" }).format(ahora);
 }
+
+/** 0.1634 → «16,3 %». */
+export const porcentaje = (x: number, decimales = 1) => `${(Math.round(x * 100 * 10 ** decimales) / 10 ** decimales).toFixed(decimales).replace(".", ",")} %`;
+
+/** Importe compacto para ejes: 150000 → «1.500 €». */
+export const eurEje = (cent: number) => eur(cent, 0);
+
+/** «−150,00 €» para lo que sale, sin signo si es cero. */
+export const menos = (cent: number) => (cent ? `−${eur(Math.abs(cent))}` : eur(0));
+
+/**
+ * Marcas redondas para un eje (en céntimos): pasos de 1, 2, 2,5 o 5 por potencia de 10,
+ * como mucho `n` intervalos, cubriendo de `min` a `max`.
+ */
+export function marcasEje(min: number, max: number, n = 4): number[] {
+  if (max <= min) max = min + 100;
+  const bruto = (max - min) / n;
+  const pot = 10 ** Math.floor(Math.log10(bruto));
+  const paso = [1, 2, 2.5, 5, 10].map((k) => k * pot).find((p) => p >= bruto)!;
+  const desde = Math.floor(min / paso) * paso;
+  const marcas: number[] = [];
+  for (let v = desde; ; v += paso) {
+    marcas.push(Math.round(v));
+    if (v >= max) return marcas;
+  }
+}

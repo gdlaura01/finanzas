@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { eur, esFechaISO, fecha, fechaEnMes, hoy, importeACampo, leerImporte, nombreMes, sumarDias, sumarMeses } from "./formato";
+import { eur, esFechaISO, marcasEje, menos, porcentaje, fecha, fechaEnMes, hoy, importeACampo, leerImporte, nombreMes, sumarDias, sumarMeses } from "./formato";
 
 describe("importes", () => {
   it("se escriben con coma decimal, punto de miles y € detrás", () => {
@@ -8,6 +8,20 @@ describe("importes", () => {
     expect(eur(5)).toBe("0,05 €");
     expect(eur(123456789)).toBe("1.234.567,89 €");
     expect(eur(43550, 0)).toBe("436 €");
+  });
+  it("lo que sale lleva menos, salvo el cero", () => {
+    expect(menos(15000)).toBe("−150,00 €");
+    expect(menos(0)).toBe("0,00 €");
+  });
+  it("marcas de eje redondas", () => {
+    expect(marcasEje(0, 133191)).toEqual([0, 50000, 100000, 150000]);
+    expect(marcasEje(257500, 526800)).toEqual([200000, 300000, 400000, 500000, 600000]);
+    expect(marcasEje(0, 0)).toEqual([0, 25, 50, 75, 100]);
+  });
+  it("porcentajes con coma", () => {
+    expect(porcentaje(1.634)).toBe("163,4 %");
+    expect(porcentaje(0)).toBe("0,0 %");
+    expect(porcentaje(0.256, 0)).toBe("26 %");
   });
   it("se leen como los escribirías", () => {
     expect(leerImporte("12,5")).toBe(1250);

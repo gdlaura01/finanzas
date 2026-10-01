@@ -10,8 +10,8 @@ import { describirRecurrente } from "@/lib/movimientos";
 
 export const metadata = { title: "Movimientos · Finanzas" };
 
-export default async function Movimientos({ searchParams }: { searchParams: Promise<{ mes?: string }> }) {
-  const { mes: param } = await searchParams;
+export default async function Movimientos({ searchParams }: { searchParams: Promise<{ mes?: string; editar?: string }> }) {
+  const { mes: param, editar } = await searchParams;
   const base = db();
   const hoyISO = hoy();
   const todos = param === "todos";
@@ -46,6 +46,7 @@ export default async function Movimientos({ searchParams }: { searchParams: Prom
           meses={m.mesesConMovimientos(base)}
           mes={todos ? null : mes}
           hoy={hoyISO}
+          editarInicial={Number(editar) || undefined}
         />
       </div>
     </main>
