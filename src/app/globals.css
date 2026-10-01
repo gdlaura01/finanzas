@@ -110,3 +110,13 @@
     font-variant-numeric: tabular-nums;
   }
 }
+
+@keyframes aparece {
+  from { opacity: 0; }
+}
+@keyframes sube {
+  from { opacity: 0; transform: translateY(8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
