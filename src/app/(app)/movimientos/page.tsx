@@ -1,3 +1,6 @@
+import Link from "next/link";
+import { FileUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Cabecera } from "@/components/app/marco";
 import { SelectorMes } from "@/components/app/selector-mes";
 import { Pendientes, type PendienteVista } from "@/components/movimientos/pendientes";
@@ -24,6 +27,11 @@ export default async function Movimientos({ searchParams }: { searchParams: Prom
   return (
     <main>
       <Cabecera titulo="Movimientos">
+        <Button asChild variant="outline">
+          <Link href="/importar">
+            <FileUp /> Importar extracto
+          </Link>
+        </Button>
         <SelectorMes ruta="/movimientos" mes={mes} texto={todos ? "Todos los meses" : undefined} />
       </Cabecera>
       <div className="flex flex-col gap-5 px-4 pb-10 pt-3 sm:px-8">

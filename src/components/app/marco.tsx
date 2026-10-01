@@ -15,7 +15,7 @@ const SECCIONES: Seccion[] = [
   { ruta: "/presupuesto", nombre: "Presupuesto", corto: "Presup.", icono: Euro, lista: true },
   { ruta: "/calendario", nombre: "Calendario anual", corto: "Calend.", icono: CalendarDays, lista: true },
   { ruta: "/cuentas", nombre: "Cuentas y ahorro", corto: "Cuentas", icono: TrendingUp },
-  { ruta: "/revisar", nombre: "Revisar carga inicial", corto: "Revisar", icono: ListChecks },
+  { ruta: "/revisar", nombre: "Revisar carga inicial", corto: "Revisar", icono: ListChecks, lista: true },
   { ruta: "/ajustes", nombre: "Ajustes", corto: "Ajustes", icono: Settings },
 ];
 
@@ -68,7 +68,7 @@ export function Marco({ porRevisar, children }: { porRevisar: number; children: 
         </form>
       </aside>
 
-      <div className="min-w-0 pb-24 md:pb-0">{children}</div>
+      <div className="min-w-0 pb-24">{children}</div>
 
       <nav aria-label="Secciones" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 bg-oliva px-1 pb-[max(env(safe-area-inset-bottom),6px)] pt-1.5 text-[#f3ead9] md:hidden">
         {SECCIONES.map((s) => {
