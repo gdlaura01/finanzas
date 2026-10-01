@@ -1,6 +1,8 @@
+import { networkInterfaces } from "node:os";
 import { asc, sql } from "drizzle-orm";
+import { headers } from "next/headers";
 import Link from "next/link";
-import { Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink, Smartphone } from "lucide-react";
 import { BotonesDrive } from "@/components/app/acciones-drive";
 import { Cabecera } from "@/components/app/marco";
 import { ListaAtajos, ListaGrupos, ListaRecurrentes, ListaReglas, NuevaRegla, NuevoAtajo, NuevoGrupo, NuevoRecurrente, ProbarRegla } from "@/components/ajustes/listas";
@@ -11,6 +13,7 @@ import * as t from "@/db/schema";
 import { importeRecurrente } from "@/lib/movimientos";
 import { rutaToken } from "@/lib/drive/google";
 import { estadoDrive } from "@/lib/drive/servidor";
+import { direccionesLocales, esEsteOrdenador } from "@/lib/red";
 import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Ajustes · Finanzas" };
@@ -21,6 +24,7 @@ const MENSAJES: Record<string, [string, boolean]> = {
   estado: ["La vuelta desde Google no coincide con la petición. Vuelve a intentarlo desde aquí.", true],
   error: ["Google no ha dado el permiso. Revisa las credenciales y vuelve a intentarlo.", true],
   "sin-credenciales": ["Falta el archivo de credenciales de Google (GOOGLE_CREDENTIALS_PATH).", true],
+  "desde-el-ordenador": ["Google solo deja dar el permiso desde el ordenador donde corre la app: abre allí http://localhost:3000/ajustes?tab=datos y pulsa «Conectar».", true],
 };
 
 const fechaHora = (iso: string) =>
@@ -107,17 +111,47 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
             <ListaReglas reglas={d.reglas} grupos={d.grupos} />
           </>
         )}
-        {sel === "datos" && <CopiaYDatos drive={drive} />}
+        {sel === "datos" && <CopiaYDatos drive={drive} host={(await headers()).get("host") ?? ""} />}
       </div>
     </main>
   );
 }
 
-function CopiaYDatos({ drive }: { drive?: string }) {
+function CopiaYDatos({ drive, host }: { drive?: string; host: string }) {
   const e = estadoDrive();
   const aviso = drive ? MENSAJES[drive] : null;
+  const url = new URL(`http://${host || "localhost"}`);
+  const enOrdenador = esEsteOrdenador(url.hostname);
+  const red = direccionesLocales(networkInterfaces(), url.port || 80);
   return (
     <>
+      <section className="rounded-xl border border-linea-suave bg-papel p-5 sm:p-6">
+        <h2 className="flex items-center gap-2 text-xl font-bold">
+          <Smartphone className="size-5 text-oliva-osc" aria-hidden /> Usar desde el móvil
+        </h2>
+        {enOrdenador ? (
+          red.length ? (
+            <>
+              <p className="mt-1 text-sm text-tinta-2">Con el móvil en la misma wifi que este ordenador, y la app abierta aquí, entra en:</p>
+              <ul className="mt-2 flex flex-col gap-1">
+                {red.map((u) => (
+                  <li key={u}>
+                    <code className="break-all rounded bg-papel-2 px-2 py-1 text-base font-semibold">{u}</code>
+                  </li>
+                ))}
+              </ul>
+              <p className="mt-2 text-xs text-tinta-3">
+                Después, en el menú del navegador, «Añadir a pantalla de inicio» para tenerla como una app. Si la dirección cambia (el router puede darle otra al ordenador), aparece aquí
+                y al arrancar la app.
+              </p>
+            </>
+          ) : (
+            <p className="mt-1 text-sm text-tinta-2">Este ordenador no está conectado a la red de casa. Conéctalo a la wifi y vuelve aquí para ver la dirección.</p>
+          )
+        ) : (
+          <p className="mt-1 text-sm text-tinta-2">Ya la estás usando desde otro aparato de casa. Funciona mientras el ordenador esté encendido con la app abierta.</p>
+        )}
+      </section>
 
         <section className="rounded-xl border border-linea-suave bg-papel p-5 sm:p-6">
           <h2 className="text-xl font-bold">Copia en Google Drive</h2>
@@ -141,6 +175,8 @@ function CopiaYDatos({ drive }: { drive?: string }) {
               </ol>
               <p className="mt-2 text-xs text-tinta-3">Los pasos detallados están en el README.</p>
             </div>
+          ) : !e.conectado && !enOrdenador ? (
+            <p className="mt-4 text-sm text-tinta-2">Para conectarlo, abre la app en el ordenador (<code className="rounded bg-papel-2 px-1">http://localhost:3000</code>): Google solo da el permiso allí.</p>
           ) : !e.conectado ? (
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <Button asChild>

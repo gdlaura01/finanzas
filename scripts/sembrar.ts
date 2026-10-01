@@ -1,3 +1,4 @@
+import "./entorno";
 import { abrirBaseDatos } from "../src/db";
 import { sembrar } from "../src/db/semilla";
 
