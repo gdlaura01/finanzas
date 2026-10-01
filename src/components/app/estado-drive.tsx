@@ -55,7 +55,7 @@ export function EstadoDriveIndicador({ inicial, oscuro = false }: { inicial: Est
   );
   return (
     <div className="flex min-w-0 items-center gap-1" role="status" aria-live="polite" title={titulo}>
-      {e.conectado ? <span className={clases}>{contenido}</span> : <Link href="/ajustes" className={cn(clases, "hover:underline")}>{contenido}</Link>}
+      {e.conectado ? <span className={clases}>{contenido}</span> : <Link href="/ajustes?tab=datos" className={cn(clases, "hover:underline")}>{contenido}</Link>}
       {e.conectado && e.estado === "error" && (
         <button
           type="button"

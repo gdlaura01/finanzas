@@ -25,11 +25,11 @@ import {
 } from "@/lib/panel";
 import { avisosPanel, cierrePendiente, resumenCierre, type Aviso } from "@/lib/avisos";
 import { eventosDelMes } from "@/lib/reglas";
+import { COLOR_CUENTA } from "@/lib/cuentas";
 import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Panel · Finanzas" };
 
-const COLOR_CUENTA: Record<Cuenta, string> = { imagin: "#BA6A4C", ahorro_tr: "#607456", inversion_tr: "#D9977A", hucha_revolut: "#BE8A2A" };
 
 export default async function Panel({ searchParams }: { searchParams: Promise<{ mes?: string }> }) {
   const { mes: param } = await searchParams;

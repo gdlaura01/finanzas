@@ -1,8 +1,14 @@
+import { asc, sql } from "drizzle-orm";
 import Link from "next/link";
 import { Download, ExternalLink } from "lucide-react";
 import { BotonesDrive } from "@/components/app/acciones-drive";
 import { Cabecera } from "@/components/app/marco";
+import { ListaAtajos, ListaGrupos, ListaRecurrentes, ListaReglas, NuevaRegla, NuevoAtajo, NuevoGrupo, NuevoRecurrente, ProbarRegla } from "@/components/ajustes/listas";
 import { Button } from "@/components/ui/button";
+import { db } from "@/db";
+import { leerParametros, todosLosGrupos } from "@/db/movimientos";
+import * as t from "@/db/schema";
+import { importeRecurrente } from "@/lib/movimientos";
 import { rutaToken } from "@/lib/drive/google";
 import { estadoDrive } from "@/lib/drive/servidor";
 import { cn } from "@/lib/utils";
@@ -20,15 +26,98 @@ const MENSAJES: Record<string, [string, boolean]> = {
 const fechaHora = (iso: string) =>
   new Intl.DateTimeFormat("es-ES", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Madrid" }).format(new Date(iso));
 
-export default async function Ajustes({ searchParams }: { searchParams: Promise<{ drive?: string }> }) {
-  const { drive } = await searchParams;
+const PESTANAS = {
+  recurrentes: "Recurrentes",
+  atajos: "Atajos",
+  grupos: "Grupos",
+  reglas: "Reglas",
+  datos: "Copia y datos",
+} as const;
+type Pestana = keyof typeof PESTANAS;
+
+const INTRO: Record<Pestana, string> = {
+  recurrentes: "Lo que se repite cada mes. Los que «se apuntan solos» se registran el día que toca; el resto te espera en Pendientes para que pongas la fecha y el importe reales.",
+  atajos: "Botones de «Registrar» que rellenan el formulario de un toque. Allí salen primero los que más usas; a igualdad, en este orden.",
+  grupos: "Las categorías del presupuesto. Un grupo con movimientos no se borra: se archiva y deja de ofrecerse.",
+  reglas: "Al importar un extracto, proponen el grupo según el concepto. Se miran de arriba abajo y gana la primera que encaja; antes que todas va lo que la app ha aprendido de tus movimientos.",
+  datos: "",
+};
+
+function datosListas() {
+  const base = db();
+  const grupos = todosLosGrupos(base);
+  const p = leerParametros(base);
+  const orden = { entrada: 0, ahorro: 1, interno: 2, interes: 3, valoracion: 4, hucha: 5, gasto: 6 } as const;
+  const recurrentes = base
+    .select()
+    .from(t.recurrentes)
+    .all()
+    .map((r) => ({ ...r, importe: importeRecurrente(r, p) }))
+    .sort((a, b) => Number(b.activo) - Number(a.activo) || orden[a.clase] - orden[b.clase] || (a.dia ?? 99) - (b.dia ?? 99) || a.concepto.localeCompare(b.concepto, "es"));
+  const atajos = base.select().from(t.atajos).orderBy(asc(t.atajos.orden)).all();
+  const reglas = base.select().from(t.reglasImportacion).orderBy(asc(t.reglasImportacion.prioridad), asc(t.reglasImportacion.id)).all();
+  const usos = Object.fromEntries(
+    base.select({ id: t.movimientos.grupoId, n: sql<number>`count(*)` }).from(t.movimientos).groupBy(t.movimientos.grupoId).all().map((u) => [u.id, u.n]),
+  ) as Record<number, number>;
+  return { grupos, recurrentes, atajos, reglas, usos };
+}
+
+export default async function Ajustes({ searchParams }: { searchParams: Promise<{ drive?: string; tab?: string }> }) {
+  const { drive, tab } = await searchParams;
+  const sel: Pestana = drive ? "datos" : tab && tab in PESTANAS ? (tab as Pestana) : "recurrentes";
+  const d = sel === "datos" ? null : datosListas();
+  const activos = d?.grupos.filter((g) => g.activo) ?? [];
+  return (
+    <main className="pb-24">
+      <Cabecera titulo="Ajustes" />
+      <div className="flex max-w-4xl flex-col gap-5 px-4 pt-3 sm:px-8">
+        <nav aria-label="Secciones de ajustes" className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+          <ul className="flex min-w-max gap-1 border-b border-linea">
+            {(Object.keys(PESTANAS) as Pestana[]).map((k) => (
+              <li key={k}>
+                <Link
+                  href={`/ajustes?tab=${k}`}
+                  aria-current={k === sel ? "page" : undefined}
+                  className={cn("-mb-px block border-b-2 px-3 py-2 text-sm font-semibold", k === sel ? "border-oliva text-tinta" : "border-transparent text-tinta-3 hover:text-tinta")}
+                >
+                  {PESTANAS[k]}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {sel !== "datos" && (
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <p className="max-w-2xl text-sm text-tinta-2">{INTRO[sel]}</p>
+            <div className="shrink-0">
+              {sel === "recurrentes" && <NuevoRecurrente grupos={activos} />}
+              {sel === "atajos" && <NuevoAtajo grupos={activos} />}
+              {sel === "grupos" && <NuevoGrupo />}
+              {sel === "reglas" && <NuevaRegla grupos={activos} />}
+            </div>
+          </div>
+        )}
+        {d && sel === "recurrentes" && <ListaRecurrentes recurrentes={d.recurrentes} grupos={d.grupos} />}
+        {d && sel === "atajos" && <ListaAtajos atajos={d.atajos} grupos={d.grupos} />}
+        {d && sel === "grupos" && <ListaGrupos grupos={d.grupos} usos={d.usos} />}
+        {d && sel === "reglas" && (
+          <>
+            <ProbarRegla reglas={d.reglas} grupos={d.grupos} />
+            <ListaReglas reglas={d.reglas} grupos={d.grupos} />
+          </>
+        )}
+        {sel === "datos" && <CopiaYDatos drive={drive} />}
+      </div>
+    </main>
+  );
+}
+
+function CopiaYDatos({ drive }: { drive?: string }) {
   const e = estadoDrive();
   const aviso = drive ? MENSAJES[drive] : null;
   return (
-    <main className="pb-12">
-      <Cabecera titulo="Ajustes" />
-      <div className="flex max-w-4xl flex-col gap-6 px-4 pt-3 sm:px-8">
-        <p className="text-sm text-tinta-3">Recurrentes, atajos, grupos y reglas de importación se configurarán aquí en la fase de pulido. Por ahora: la copia de tus datos.</p>
+    <>
 
         <section className="rounded-xl border border-linea-suave bg-papel p-5 sm:p-6">
           <h2 className="text-xl font-bold">Copia en Google Drive</h2>
@@ -46,7 +135,7 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
             <div className="mt-4 rounded-lg border border-dashed border-linea bg-campo p-4 text-sm">
               <p className="font-bold">Falta un paso en tu ordenador</p>
               <ol className="mt-2 list-decimal space-y-1 pl-5 text-tinta-2">
-                <li>En Google Cloud, crea un cliente OAuth de tipo «Aplicación web» con este URI de redirección: <code className="rounded bg-papel-2 px-1">http://localhost:3000/api/drive/callback</code>.</li>
+                <li>En Google Cloud, crea un cliente OAuth de tipo «Aplicación web» con este URI de redirección: <code className="break-all rounded bg-papel-2 px-1">http://localhost:3000/api/drive/callback</code>.</li>
                 <li>Descarga su JSON y guárdalo fuera de esta carpeta (por ejemplo en <code className="rounded bg-papel-2 px-1">~/.config/finanzas/google-oauth.json</code>).</li>
                 <li>Pon esa ruta en <code className="rounded bg-papel-2 px-1">GOOGLE_CREDENTIALS_PATH</code> en <code className="rounded bg-papel-2 px-1">.env.local</code> y reinicia la app.</li>
               </ol>
@@ -101,7 +190,6 @@ export default async function Ajustes({ searchParams }: { searchParams: Promise<
             </Link>
           </Button>
         </section>
-      </div>
-    </main>
+    </>
   );
 }

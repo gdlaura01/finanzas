@@ -2,7 +2,7 @@
 
 Aplicación de finanzas personales para usar en tu propio ordenador. Los datos viven en un archivo SQLite local (`data/finanzas.db`); nada sale a la nube salvo la copia de seguridad en tu Google Drive.
 
-> Estado: **fase 8** (acceso, movimientos, panel con avisos, presupuesto, calendario, importadores y copia en Google Drive). El pulido llega en la fase siguiente.
+> Estado: **fase 9**, completa: acceso, movimientos, panel con avisos, presupuesto, calendario, cuentas y ahorro, importadores, copia en Google Drive y ajustes.
 
 ## Requisitos
 
@@ -78,6 +78,22 @@ Solo lectura, para leer de un vistazo (de arriba abajo y de izquierda a derecha)
 - **Presupuesto**: el margen del plan de cada mes (nómina − traspaso a Trade Republic − hucha − lo que el presupuesto de los grupos pide a la nómina, es decir, sin la parte prevista en efectivo), la nómina y los importes habituales de ahorro, y el presupuesto de cada grupo con su parte en efectivo. Todo se guarda al salir de cada casilla.
 - **Calendario anual**: próximos 12 meses o año natural. Cada evento tiene grupo, etiqueta, color, día opcional y puede ser «solo este año». Su importe se suma al presupuesto de su grupo ese mes (Regalos solo tiene eventos). Lo gastado con su etiqueta cuenta como gastado en el evento. Los eventos sin mes esperan en su bandeja.
 
+## Cuentas y ahorro
+
+- **Tus cuentas hoy**: Imagin, Ahorro TR, Inversión TR y hucha, con su tendencia de los últimos meses. Pulsa una para ver su detalle.
+- **Cuadrar con el banco**: escribe el saldo real de hoy; desde ese momento la cuenta se calcula a partir de él y se te dice cuánta diferencia había. En Inversión TR, en su lugar, **anotas el valor** que ves en la app (con uno al mes basta).
+- **Ahorro TR**: lo que entra y sale cada mes, los **intereses** (editables a mano en su tabla; vacío o 0 lo quita) y lo que te darían en 12 meses al tipo actual.
+- **Inversión TR**: valor frente a lo aportado, ganancia, rentabilidad anual (TIR) y comparación con haber dejado ese dinero en Ahorro TR.
+- **Colchón**: Ahorro TR + hucha frente a 3 o 6 meses de tu gasto medio.
+
+## Ajustes
+
+- **Recurrentes**: lo que se repite cada mes. «Se apunta solo» lo registra el día que toca (necesita día e importe); si no, te espera en *Pendientes*. Uno nuevo empieza este mes, o el que viene si su día ya pasó. Los de la app (nómina, traspasos, intereses, valor de la inversión) se pueden editar o desactivar, pero no borrar; la nómina y los traspasos cambian su importe en Presupuesto. Borrar un recurrente no borra los movimientos que ya apuntó.
+- **Atajos**: los botones de «Registrar». Texto, concepto, tipo, grupo, medio e importe (vacío = lo escribes al usarlo). Allí salen primero los más usados; a igualdad, en el orden de aquí.
+- **Grupos**: nombre, color y orden; uno nuevo se coloca antes de «Otros». Un grupo con movimientos (o usado en eventos, atajos, recurrentes o reglas) no se borra: se archiva y se puede reactivar.
+- **Reglas**: proponen el grupo al importar. Palabras separadas por comas, sin importar mayúsculas ni tildes (`^bar` = empieza por «bar», `^hm$` = exactamente «hm»). Se miran de arriba abajo; una nueva va la primera. «Prueba un concepto» te dice qué regla lo clasificaría.
+- **Copia y datos**: la copia en Google Drive y la descarga del libro `.xlsx`.
+
 ## Importar
 
 En **Movimientos › Importar extracto** (o en `/importar`):
@@ -113,7 +129,7 @@ sqlite3 data/finanzas.db ".backup 'data/copias/finanzas-$(date +%F).db'"
 
 **Restaurar**: cierra la app, borra `data/finanzas.db`, `data/finanzas.db-wal` y `data/finanzas.db-shm`, y copia la copia elegida como `data/finanzas.db`. Al arrancar se aplicarán las migraciones que falten.
 
-También puedes descargar en cualquier momento el libro `.xlsx` con los datos calculados desde **Ajustes › Copia local**.
+También puedes descargar en cualquier momento el libro `.xlsx` con los datos calculados desde **Ajustes › Copia y datos**.
 
 ## Copia en Google Drive
 
@@ -126,7 +142,7 @@ Tras cada cambio (con unos segundos de margen para agrupar), la app genera un li
 3. En **Credenciales › Crear credenciales › ID de cliente de OAuth**, tipo **Aplicación web**, con este URI de redirección autorizado: `http://localhost:3000/api/drive/callback` (si usas otro puerto, cámbialo).
 4. Descarga el JSON y guárdalo **fuera de esta carpeta**, por ejemplo en `~/.config/finanzas/google-oauth.json`, con permisos solo para ti (`chmod 600`).
 5. Pon su ruta en `GOOGLE_CREDENTIALS_PATH` dentro de `.env.local` y reinicia la app.
-6. En **Ajustes › Copia en Google Drive**, pulsa **Conectar con Google Drive** y acepta.
+6. En **Ajustes › Copia y datos**, pulsa **Conectar con Google Drive** y acepta.
 
 La app solo pide el permiso `drive.file`: ve el archivo que ella crea, no el resto de tu Drive. El permiso duradero (refresh token) se guarda en `~/.config/finanzas/google-token.json` (fuera del repositorio, permisos 600). Para retirarlo: **Desconectar** en Ajustes, o quita el acceso desde tu cuenta de Google. Si borras el archivo en Drive, la app crea otro en la siguiente copia.
 
