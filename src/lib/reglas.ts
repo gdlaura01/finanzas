@@ -79,7 +79,7 @@ export function resumenMes(movs: Mov[], mes: string): ResumenMes {
 /** Un evento se repite cada año salvo que tenga un año concreto. */
 export const eventoAplica = (e: Pick<Evento, "anio">, anio: number) => !e.anio || e.anio === anio;
 
-export function eventosDelMes(eventos: Evento[], mes: string, grupoId?: number) {
+export function eventosDelMes<T extends Evento>(eventos: T[], mes: string, grupoId?: number): T[] {
   const [a, mm] = mes.split("-").map(Number);
   return eventos.filter((e) => e.mes === mm && eventoAplica(e, a) && (grupoId == null || e.grupoId === grupoId));
 }

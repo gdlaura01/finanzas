@@ -2,7 +2,7 @@
 
 Aplicación de finanzas personales para usar en tu propio ordenador. Los datos viven en un archivo SQLite local (`data/finanzas.db`); nada sale a la nube salvo la copia de seguridad en tu Google Drive.
 
-> Estado: **fase 2** (modelo de datos, reglas de negocio y acceso con contraseña). Las pantallas de trabajo llegan en las fases siguientes.
+> Estado: **fase 3** (modelo de datos, acceso con contraseña y registro de movimientos). El panel, el presupuesto y el resto de pantallas llegan en las fases siguientes.
 
 ## Requisitos
 
@@ -47,6 +47,15 @@ Hay un único usuario y no hay registro ni recuperación de contraseña.
 
 `.env*`, la base de datos, las hojas de cálculo y las credenciales de Google están en `.gitignore`.
 
+## Registrar movimientos
+
+- **Registrar**: botón flotante o tecla <kbd>N</kbd> desde cualquier pantalla. Eliges qué es (gasto, entrada de dinero, ahorro, a la hucha o sacar de la hucha) y escribes el importe en positivo. <kbd>Intro</kbd> guarda y deja el formulario listo para el siguiente.
+- **Fechas**: la de compra y la de cargo. El mes lo decide la de cargo; los botones «mismo día, +1, +2, +3» la ajustan.
+- **Entradas de dinero**: si el concepto parece una nómina se guardan como ingreso; si no, como devolución en su grupo. Puedes cambiarlo antes de guardar.
+- **Cubrir con la hucha**: en un gasto, apunta también una retirada de la hucha a Imagin por el mismo importe, enlazada al gasto: si lo editas, se ajusta; si lo borras, se borra.
+- **Atajos y propuestas**: los atajos más usados salen primero. Al escribir un concepto conocido se propone lo de la última vez (o lo de tus reglas), sin tocar lo que ya hayas cambiado.
+- **Movimientos**: en *Pendientes* confirmas los recurrentes del mes con la fecha y el importe reales, los omites o cambias su día previsto. La tabla se filtra, se ordena y se edita en la propia fila.
+
 ## Base de datos
 
 | Orden | Qué hace |
@@ -81,6 +90,8 @@ Además, la app mantendrá un libro `.xlsx` en tu Google Drive con los datos ya 
 npm test          # pruebas
 npm run tipos     # comprobación de tipos
 ```
+
+Las pruebas del registro están en `src/lib/movimientos.test.ts`, `src/lib/formato.test.ts` y `src/db/movimientos.test.ts`: traducción de cada tipo al modelo, avisos del formulario, retirada enlazada al cubrir con la hucha, recurrentes pendientes y automáticos, formato español de importes y fechas.
 
 Las pruebas del acceso están en `src/lib/auth/auth.test.ts`: firma y caducidad de la sesión, credenciales, escritura de `.env.local`, límite de intentos y redirecciones seguras.
 
