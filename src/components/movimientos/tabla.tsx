@@ -29,6 +29,7 @@ export function TablaMovimientos({
   meses,
   mes,
   hoy,
+  editarInicial,
 }: {
   movimientos: Movimiento[];
   grupos: GrupoVista[];
@@ -36,12 +37,14 @@ export function TablaMovimientos({
   meses: string[];
   mes: string | null;
   hoy: string;
+  /** Movimiento que se abre ya en edición (desde el lápiz del panel). */
+  editarInicial?: number;
 }) {
   const router = useRouter();
   const [f, setF] = useState<Filtros>(SIN_FILTROS);
   const [masFiltros, setMasFiltros] = useState(false);
   const [orden, setOrden] = useState<{ k: Orden; dir: 1 | -1 }>({ k: "cargo", dir: -1 });
-  const [editando, setEditando] = useState<number | null>(null);
+  const [editando, setEditando] = useState<number | null>(editarInicial ?? null);
   const [borrando, setBorrando] = useState<number | null>(null);
 
   const grupo = (id: number | null) => grupos.find((g) => g.id === id);

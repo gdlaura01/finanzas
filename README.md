@@ -2,7 +2,7 @@
 
 Aplicación de finanzas personales para usar en tu propio ordenador. Los datos viven en un archivo SQLite local (`data/finanzas.db`); nada sale a la nube salvo la copia de seguridad en tu Google Drive.
 
-> Estado: **fase 3** (modelo de datos, acceso con contraseña y registro de movimientos). El panel, el presupuesto y el resto de pantallas llegan en las fases siguientes.
+> Estado: **fase 4** (acceso, registro de movimientos y panel). El presupuesto, el calendario y el resto de pantallas llegan en las fases siguientes.
 
 ## Requisitos
 
@@ -56,6 +56,16 @@ Hay un único usuario y no hay registro ni recuperación de contraseña.
 - **Atajos y propuestas**: los atajos más usados salen primero. Al escribir un concepto conocido se propone lo de la última vez (o lo de tus reglas), sin tocar lo que ya hayas cambiado.
 - **Movimientos**: en *Pendientes* confirmas los recurrentes del mes con la fecha y el importe reales, los omites o cambias su día previsto. La tabla se filtra, se ordena y se edita en la propia fila.
 
+## Panel
+
+Solo lectura, para leer de un vistazo (de arriba abajo y de izquierda a derecha):
+
+- **Te queda por gastar**: ingresos − ahorro − lo traspasado a la hucha + lo sacado de ella − el gasto que paga Imagin (el efectivo y lo pagado con la hucha cuentan en su grupo, pero no restan de aquí). Avisa de las compras con tarjeta aún sin cargar.
+- **Tus cuentas**: Imagin, Ahorro TR, Inversión TR y hucha, a hoy o al cierre del mes elegido.
+- **Avisos**: grupos por encima del 80 % de su presupuesto, gasto en grupos sin presupuesto, eventos a menos de dos semanas y apuntes pendientes de revisar.
+- **Resumen del mes**, **semáforo por grupo** (presupuesto fijo + eventos del mes), **reparto del gasto**, **ingresos frente a gastos** del año y **ahorro acumulado** desde el saldo de partida. Cada gráfico tiene su versión en tabla.
+- **Pendientes**, **próximos eventos** y **últimos movimientos** (el lápiz abre el movimiento ya en edición). En meses pasados, además, el **cierre** frente al mes anterior.
+
 ## Base de datos
 
 | Orden | Qué hace |
@@ -90,6 +100,8 @@ Además, la app mantendrá un libro `.xlsx` en tu Google Drive con los datos ya 
 npm test          # pruebas
 npm run tipos     # comprobación de tipos
 ```
+
+Las pruebas del panel están en `src/lib/panel.test.ts`: resumen con gasolina y efectivo, presupuesto por grupo con eventos, avisos, próximos eventos, saldos de las cuentas, ahorro acumulado, rendimiento de Inversión TR y cierre del mes.
 
 Las pruebas del registro están en `src/lib/movimientos.test.ts`, `src/lib/formato.test.ts` y `src/db/movimientos.test.ts`: traducción de cada tipo al modelo, avisos del formulario, retirada enlazada al cubrir con la hucha, recurrentes pendientes y automáticos, formato español de importes y fechas.
 
