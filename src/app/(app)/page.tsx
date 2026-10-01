@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { AlertTriangle, Check, ChevronLeft, ChevronRight, Clock, Pencil } from "lucide-react";
+import { AlertTriangle, Check, Clock, Pencil } from "lucide-react";
 import { Cabecera } from "@/components/app/marco";
+import { SelectorMes } from "@/components/app/selector-mes";
 import { GraficoAhorro, GraficoIngresosGastos, RepartoGasto } from "@/components/panel/graficos";
 import { db } from "@/db";
 import { datosPanel } from "@/db/panel";
 import type { Cuenta } from "@/db/schema";
-import { esMes, eur, fecha, fechaCorta, hoy, MESES, mayuscula, menos, nombreMes, porcentaje, sumarMeses } from "@/lib/formato";
+import { esMes, eur, fecha, fechaCorta, hoy, MESES, menos, nombreMes, porcentaje, sumarMeses } from "@/lib/formato";
 import { CLASES, claseDe, sentido } from "@/lib/movimientos";
 import {
   avisosPanel,
@@ -57,20 +58,11 @@ export default async function Panel({ searchParams }: { searchParams: Promise<{ 
   const grupo = (id: number | null) => d.grupos.find((g) => g.id === id);
 
   const cuando = mes === mesHoy ? "hoy" : mes < mesHoy ? `al cierre de ${nombre}` : `previsto a fin de ${nombre}`;
-  const enlaceMes = (k: number) => `/?mes=${sumarMeses(mes, k)}`;
 
   return (
     <main className="pb-12">
       <Cabecera titulo="Panel">
-        <nav aria-label="Mes" className="flex items-center rounded-full border border-linea bg-papel">
-          <Link href={enlaceMes(-1)} className="grid size-10 place-items-center rounded-full hover:bg-papel-2" aria-label="Mes anterior">
-            <ChevronLeft className="size-4" />
-          </Link>
-          <span className="min-w-36 text-center font-titulo font-bold">{mayuscula(nombreMes(mes))}</span>
-          <Link href={enlaceMes(1)} className="grid size-10 place-items-center rounded-full hover:bg-papel-2" aria-label="Mes siguiente">
-            <ChevronRight className="size-4" />
-          </Link>
-        </nav>
+        <SelectorMes ruta="/" mes={mes} />
       </Cabecera>
 
       <div className="flex flex-col gap-8 px-4 pt-3 sm:px-8">
@@ -232,7 +224,7 @@ export default async function Panel({ searchParams }: { searchParams: Promise<{ 
             )}
           </Tarjeta>
 
-          <Tarjeta titulo="Próximos eventos">
+          <Tarjeta titulo="Próximos eventos" accion={{ href: "/calendario", texto: "Ver calendario →" }}>
             {proximos.length ? (
               <ul className="divide-y divide-linea-suave text-sm">
                 {proximos.map((e) => (
@@ -255,7 +247,10 @@ export default async function Panel({ searchParams }: { searchParams: Promise<{ 
             )}
             {d.eventos.some((e) => !e.mes) && (
               <p className="mt-2 border-t border-linea-suave pt-2 text-center text-xs text-tinta-3">
-                {d.eventos.filter((e) => !e.mes).length} eventos sin mes asignado: los asignarás en el calendario.
+                {d.eventos.filter((e) => !e.mes).length} eventos sin mes asignado.{" "}
+                <Link href="/calendario" className="font-bold text-oliva-osc hover:underline">
+                  Asignarlos
+                </Link>
               </p>
             )}
           </Tarjeta>
