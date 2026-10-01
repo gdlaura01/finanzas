@@ -2,28 +2,29 @@ import Link from "next/link";
 import { AlertTriangle, Check, Clock, Pencil } from "lucide-react";
 import { Cabecera } from "@/components/app/marco";
 import { SelectorMes } from "@/components/app/selector-mes";
+import { AvisoCierre, CierreCompleto } from "@/components/panel/cierre";
 import { GraficoAhorro, GraficoIngresosGastos, RepartoGasto } from "@/components/panel/graficos";
 import { db } from "@/db";
 import { datosPanel } from "@/db/panel";
 import type { Cuenta } from "@/db/schema";
-import { esMes, eur, fecha, fechaCorta, hoy, MESES, menos, nombreMes, porcentaje, sumarMeses } from "@/lib/formato";
+import { esMes, eur, fecha, fechaCorta, hoy, MESES, menos, porcentaje, sumarMeses } from "@/lib/formato";
 import { CLASES, claseDe, sentido } from "@/lib/movimientos";
 import {
-  avisosPanel,
-  cierreMes,
   comprasSinCargar,
   fechaReferencia,
   filasGrupos,
   finDeMes,
+  gastadoEnEvento,
   proximosEventos,
   rendimientoInversion,
   resumenPanel,
   saldos,
   serieAhorro,
   serieAnual,
-  type Aviso,
   type FilaGrupo,
 } from "@/lib/panel";
+import { avisosPanel, cierrePendiente, resumenCierre, type Aviso } from "@/lib/avisos";
+import { eventosDelMes } from "@/lib/reglas";
 import { cn } from "@/lib/utils";
 
 export const metadata = { title: "Panel · Finanzas" };
@@ -42,7 +43,23 @@ export default async function Panel({ searchParams }: { searchParams: Promise<{ 
   const r = resumenPanel(d.movs, mes, d.grupos);
   const filas = filasGrupos(d.grupos, d.eventos, d.movs, mes);
   const proximos = proximosEventos(d.eventos, d.movs, hoyISO);
-  const avisos = avisosPanel({ filas, proximos: mes === mesHoy ? proximos : [], porRevisar: d.porRevisar, nombreMes: nombre, eur, pct: porcentaje });
+  const enCurso = mes === mesHoy;
+  const avisos = avisosPanel({
+    filas,
+    // Los avisos de fechas solo tienen sentido en el mes en curso
+    proximos: enCurso ? proximos : [],
+    eventosMes: enCurso ? eventosDelMes(d.eventos, mes).map((e) => ({ id: e.id, nombre: e.nombre, importePrevistoCent: e.importePrevistoCent, gastado: gastadoEnEvento(d.movs, e.etiqueta, Number(mes.slice(0, 4))) })) : [],
+    atrasados: enCurso ? d.pendientes.filter((x) => x.fechaPrevista && x.fechaPrevista < hoyISO).map((x) => ({ id: x.recurrente.id, concepto: x.recurrente.concepto, fechaPrevista: x.fechaPrevista! })) : [],
+    porRevisar: d.porRevisar,
+    nombreMes: nombre,
+    mes,
+    eur,
+    pct: porcentaje,
+    fechaCorta,
+  });
+  // Al empezar el mes, el cierre del anterior hasta que lo marques como visto
+  const mesCierre = enCurso ? cierrePendiente(hoyISO, typeof p.cierre_visto === "string" ? p.cierre_visto : null, (m) => d.movs.some((x) => x.fechaCargo.startsWith(m))) : null;
+  const cierreAviso = mesCierre ? resumenCierre(d.movs, mesCierre, filasGrupos(d.grupos, d.eventos, d.movs, mesCierre)) : null;
   const sinCargar = mes === mesHoy ? comprasSinCargar(d.movs, hoyISO) : [];
 
   const datosSaldos = { cuadres: d.cuadres, movs: d.movs, intereses: d.intereses, valoraciones: d.valoraciones };
@@ -148,6 +165,8 @@ export default async function Panel({ searchParams }: { searchParams: Promise<{ 
             </div>
           </div>
         </section>
+
+        {cierreAviso && <AvisoCierre c={cierreAviso} />}
 
         {avisos.length > 0 && (
           <section aria-label="Avisos" className="flex flex-col gap-2">
@@ -289,7 +308,7 @@ export default async function Panel({ searchParams }: { searchParams: Promise<{ 
           </Tarjeta>
         </section>
 
-        {mes < mesHoy && <Cierre movs={d.movs} mes={mes} filas={filas} />}
+        {mes < mesHoy && <CierreCompleto c={resumenCierre(d.movs, mes, filas)} />}
       </div>
     </main>
   );
@@ -407,64 +426,5 @@ function Semaforo({ filas }: { filas: FilaGrupo[] }) {
         })}
       </ul>
     </Tarjeta>
-  );
-}
-
-function Cierre({ movs, mes, filas }: { movs: Parameters<typeof cierreMes>[0]; mes: string; filas: FilaGrupo[] }) {
-  const c = cierreMes(movs, mes);
-  const cambio = (v: number, subirEsMalo = false) => (
-    <span className={cn("num", v !== 0 && (v > 0) === subirEsMalo && "text-burdeos")}>
-      {v > 0 ? "+" : ""}
-      {eur(v)}
-    </span>
-  );
-  return (
-    <section className="rounded-xl border border-linea-suave bg-papel p-5">
-      <h2 className="text-lg font-bold">Cierre de {nombreMes(mes)}</h2>
-      <div className="mt-3 grid gap-3 sm:grid-cols-3">
-        <div>
-          <p className="text-xs text-tinta-2">Total ahorrado (Trade Republic + hucha)</p>
-          <p className="text-2xl font-bold">{eur(c.ahorrado.valor)}</p>
-          <p className="text-xs text-tinta-3">frente al mes anterior {cambio(c.ahorrado.cambio)}</p>
-        </div>
-        <div>
-          <p className="text-xs text-tinta-2">Gasto total</p>
-          <p className="text-2xl font-bold">{eur(c.gasto.valor)}</p>
-          <p className="text-xs text-tinta-3">frente al mes anterior {cambio(c.gasto.cambio, true)}</p>
-        </div>
-        <div>
-          <p className="text-xs text-tinta-2">Disponible final</p>
-          <p className={cn("text-2xl font-bold", c.disponible.valor < 0 && "text-burdeos")}>{eur(c.disponible.valor)}</p>
-          <p className="text-xs text-tinta-3">frente al mes anterior {cambio(c.disponible.cambio)}</p>
-        </div>
-      </div>
-      <div className="mt-4 overflow-x-auto">
-        <table className="num w-full text-sm">
-          <thead className="text-left text-xs text-tinta-3">
-            <tr>
-              <th className="py-1.5 font-semibold">Grupo</th>
-              <th className="py-1.5 text-right font-semibold">Presupuesto</th>
-              <th className="py-1.5 text-right font-semibold">Real</th>
-              <th className="py-1.5 text-right font-semibold">Diferencia</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-linea-suave">
-            {filas
-              .filter((f) => f.presupuesto || f.real)
-              .map((f) => (
-                <tr key={f.grupo.id}>
-                  <td className="py-1.5">{f.grupo.nombre}</td>
-                  <td className="py-1.5 text-right">{eur(f.presupuesto)}</td>
-                  <td className="py-1.5 text-right">{eur(f.real)}</td>
-                  <td className={cn("py-1.5 text-right", f.real > f.presupuesto && "font-bold text-burdeos")}>
-                    {f.real > f.presupuesto ? "+" : ""}
-                    {eur(f.real - f.presupuesto)}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
   );
 }

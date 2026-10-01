@@ -2,7 +2,7 @@
 
 Aplicación de finanzas personales para usar en tu propio ordenador. Los datos viven en un archivo SQLite local (`data/finanzas.db`); nada sale a la nube salvo la copia de seguridad en tu Google Drive.
 
-> Estado: **fase 7** (acceso, movimientos, panel, presupuesto, calendario, importadores y copia en Google Drive). Avisos y pulido llegan en las fases siguientes.
+> Estado: **fase 8** (acceso, movimientos, panel con avisos, presupuesto, calendario, importadores y copia en Google Drive). El pulido llega en la fase siguiente.
 
 ## Requisitos
 
@@ -64,7 +64,12 @@ Solo lectura, para leer de un vistazo (de arriba abajo y de izquierda a derecha)
 
 - **Te queda por gastar**: ingresos − ahorro − lo traspasado a la hucha + lo sacado de ella − el gasto que paga Imagin (el efectivo y lo pagado con la hucha cuentan en su grupo, pero no restan de aquí). Avisa de las compras con tarjeta aún sin cargar.
 - **Tus cuentas**: Imagin, Ahorro TR, Inversión TR y hucha, a hoy o al cierre del mes elegido.
-- **Avisos**: grupos por encima del 80 % de su presupuesto, gasto en grupos sin presupuesto, eventos a menos de dos semanas y apuntes pendientes de revisar.
+- **Avisos** (en el panel, nunca ventanas emergentes), de lo más grave a lo menos:
+  - un grupo que pasa del 80 % de su presupuesto del mes (ámbar) o lo supera (burdeos, con cuánto te has pasado), o gasta sin presupuesto;
+  - un evento de este mes en el que ya te has pasado de lo previsto, y los eventos a menos de dos semanas;
+  - recurrentes cuya fecha prevista ya pasó y no has confirmado;
+  - apuntes de la carga inicial por revisar.
+- **Resumen de cierre**: los 10 primeros días de cada mes, el panel te enseña el cierre del mes anterior (total ahorrado, gasto y disponible frente al mes previo, y en qué grupos te pasaste) hasta que pulses «Entendido». El cierre completo, con la desviación de cada grupo, está siempre al ver un mes pasado.
 - **Resumen del mes**, **semáforo por grupo** (presupuesto fijo + eventos del mes), **reparto del gasto**, **ingresos frente a gastos** del año y **ahorro acumulado** desde el saldo de partida. Cada gráfico tiene su versión en tabla.
 - **Pendientes**, **próximos eventos** y **últimos movimientos** (el lápiz abre el movimiento ya en edición). En meses pasados, además, el **cierre** frente al mes anterior.
 
@@ -131,6 +136,8 @@ La app solo pide el permiso `drive.file`: ve el archivo que ella crea, no el res
 npm test          # pruebas
 npm run tipos     # comprobación de tipos
 ```
+
+Las pruebas de los avisos están en `src/lib/avisos.test.ts`: umbrales del 80 % y del 100 %, eventos cercanos o ya pasados de presupuesto, recurrentes atrasados, orden por gravedad, cuándo se ofrece el cierre y sus desviaciones.
 
 Las pruebas de la copia en Drive están en `src/lib/drive/*.test.ts`: las cinco hojas del libro (solo valores, formato, importes con signo), agrupar cambios, reintentos con espera creciente, error permanente, retomar al arrancar, y el cliente de Google con respuestas simuladas.
 
