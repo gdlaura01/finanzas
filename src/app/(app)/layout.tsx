@@ -6,6 +6,7 @@ import { db } from "@/db";
 import * as m from "@/db/movimientos";
 import * as t from "@/db/schema";
 import { hoy } from "@/lib/formato";
+import { estadoDrive, marcarCambio } from "@/lib/drive/servidor";
 
 // Todo sale de la base de datos local en cada visita.
 export const dynamic = "force-dynamic";
@@ -13,7 +14,8 @@ export const dynamic = "force-dynamic";
 export default function LayoutApp({ children }: { children: React.ReactNode }) {
   const base = db();
   const hoyISO = hoy();
-  m.registrarAutomaticos(base, hoyISO);
+  // Los recurrentes que se apuntan solos también van a la copia de Drive
+  if (m.registrarAutomaticos(base, hoyISO)) marcarCambio();
 
   const datos: DatosRegistro = {
     hoy: hoyISO,
@@ -29,7 +31,7 @@ export default function LayoutApp({ children }: { children: React.ReactNode }) {
   return (
     <Avisos>
       <Registro datos={datos}>
-        <Marco porRevisar={m.porRevisar(base)}>{children}</Marco>
+        <Marco porRevisar={m.porRevisar(base)} drive={estadoDrive()}>{children}</Marco>
       </Registro>
     </Avisos>
   );

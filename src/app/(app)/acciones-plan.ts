@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { trasCambio } from "@/lib/cambios";
 import { db } from "@/db";
 import { leerParametros, todosLosGrupos } from "@/db/movimientos";
 import * as plan from "@/db/plan";
@@ -8,7 +8,7 @@ import { conSesion, type Resultado } from "@/lib/auth/exigir";
 import { eur, leerImporte } from "@/lib/formato";
 import { PARAMETROS_PLAN, validarEvento, validarParametro, type ErroresEvento, type FormularioEvento, type ParametroPlan } from "@/lib/plan";
 
-const refrescar = () => revalidatePath("/", "layout");
+const refrescar = trasCambio;
 
 export async function guardarParametroPlan(clave: string, texto: string): Promise<Resultado> {
   return conSesion(() => {

@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CalendarDays, LayoutGrid, ListChecks, LogOut, Menu as Lista, Euro, Settings, TrendingUp } from "lucide-react";
 import { salir } from "@/app/entrar/acciones";
+import type { EstadoDrive } from "@/lib/drive/servidor";
 import { cn } from "@/lib/utils";
+import { EstadoDriveIndicador } from "./estado-drive";
 
 type Seccion = { ruta: string; nombre: string; corto: string; icono: React.ElementType; lista?: boolean };
 
@@ -16,10 +18,10 @@ const SECCIONES: Seccion[] = [
   { ruta: "/calendario", nombre: "Calendario anual", corto: "Calend.", icono: CalendarDays, lista: true },
   { ruta: "/cuentas", nombre: "Cuentas y ahorro", corto: "Cuentas", icono: TrendingUp },
   { ruta: "/revisar", nombre: "Revisar carga inicial", corto: "Revisar", icono: ListChecks, lista: true },
-  { ruta: "/ajustes", nombre: "Ajustes", corto: "Ajustes", icono: Settings },
+  { ruta: "/ajustes", nombre: "Ajustes", corto: "Ajustes", icono: Settings, lista: true },
 ];
 
-export function Marco({ porRevisar, children }: { porRevisar: number; children: React.ReactNode }) {
+export function Marco({ porRevisar, drive, children }: { porRevisar: number; drive: EstadoDrive; children: React.ReactNode }) {
   const ruta = usePathname();
   const activa = (s: Seccion) => (s.ruta === "/" ? ruta === "/" : ruta.startsWith(s.ruta));
   const insignia = (s: Seccion) =>
@@ -61,14 +63,22 @@ export function Marco({ porRevisar, children }: { porRevisar: number; children: 
             );
           })}
         </nav>
-        <form action={salir} className="mt-auto px-1">
+        <div className="mt-auto px-2 pb-3">
+          <EstadoDriveIndicador inicial={drive} oscuro />
+        </div>
+        <form action={salir} className="px-1">
           <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-[#e3e6d8] hover:bg-[#6d8162]">
             <LogOut className="size-4" aria-hidden /> Salir
           </button>
         </form>
       </aside>
 
-      <div className="min-w-0 pb-24">{children}</div>
+      <div className="min-w-0 pb-24">
+        <div className="flex justify-end px-4 pt-3 md:hidden">
+          <EstadoDriveIndicador inicial={drive} />
+        </div>
+        {children}
+      </div>
 
       <nav aria-label="Secciones" className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-7 bg-oliva px-1 pb-[max(env(safe-area-inset-bottom),6px)] pt-1.5 text-[#f3ead9] md:hidden">
         {SECCIONES.map((s) => {
