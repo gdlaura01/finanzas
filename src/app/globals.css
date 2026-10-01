@@ -1,26 +1,112 @@
 @import "tailwindcss";
 
+/* Paleta de la app (solo versión clara). Los tonos intermedios derivan de los cuatro base. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --crema: #eee0cc;
+  --oliva: #607456;
+  --terracota: #ba6a4c;
+  --burdeos: #7b2525;
+
+  --papel: #f8f1e6;
+  --papel-2: #f3e8d8;
+  --campo: #fffbf5;
+  --linea: #dcc8ac;
+  --linea-suave: #e6d6bf;
+  --tinta: #2a2820;
+  --tinta-2: #5a5444;
+  --tinta-3: #857b69;
+  --oliva-osc: #46553f;
+  --oliva-claro: #dde3d0;
+  --terracota-claro: #f1d8c9;
+  --burdeos-claro: #edd5cf;
+  --ambar: #be8a2a;
+  --ambar-claro: #f3e1b9;
+
+  /* Nombres que esperan los componentes de shadcn/ui */
+  --background: var(--crema);
+  --foreground: var(--tinta);
+  --card: var(--papel);
+  --card-foreground: var(--tinta);
+  --primary: var(--oliva);
+  --primary-foreground: #f7efe3;
+  --secondary: var(--papel-2);
+  --secondary-foreground: var(--oliva-osc);
+  --muted: var(--papel-2);
+  --muted-foreground: var(--tinta-3);
+  --accent: var(--oliva-claro);
+  --accent-foreground: var(--oliva-osc);
+  --destructive: var(--burdeos);
+  --border: var(--linea);
+  --input: var(--linea);
+  --ring: var(--terracota);
+  --radius: 0.875rem;
+  color-scheme: light;
 }
 
 @theme inline {
+  --color-crema: var(--crema);
+  --color-oliva: var(--oliva);
+  --color-oliva-osc: var(--oliva-osc);
+  --color-oliva-claro: var(--oliva-claro);
+  --color-terracota: var(--terracota);
+  --color-terracota-claro: var(--terracota-claro);
+  --color-burdeos: var(--burdeos);
+  --color-burdeos-claro: var(--burdeos-claro);
+  --color-ambar: var(--ambar);
+  --color-ambar-claro: var(--ambar-claro);
+  --color-papel: var(--papel);
+  --color-papel-2: var(--papel-2);
+  --color-campo: var(--campo);
+  --color-linea: var(--linea);
+  --color-linea-suave: var(--linea-suave);
+  --color-tinta: var(--tinta);
+  --color-tinta-2: var(--tinta-2);
+  --color-tinta-3: var(--tinta-3);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --font-sans: var(--font-figtree), "Segoe UI", system-ui, sans-serif;
+  --font-titulo: var(--font-bricolage), "Trebuchet MS", Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    border-color: var(--border);
   }
-}
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-titulo);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+  }
 }
