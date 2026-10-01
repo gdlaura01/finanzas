@@ -1,11 +1,13 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+import * as t from "@/db/schema";
 import { trasCambio } from "@/lib/cambios";
 import { db } from "@/db";
 import { leerParametros, todosLosGrupos } from "@/db/movimientos";
 import * as plan from "@/db/plan";
 import { conSesion, type Resultado } from "@/lib/auth/exigir";
-import { eur, leerImporte } from "@/lib/formato";
+import { esMes, eur, leerImporte } from "@/lib/formato";
 import { PARAMETROS_PLAN, validarEvento, validarParametro, type ErroresEvento, type FormularioEvento, type ParametroPlan } from "@/lib/plan";
 
 const refrescar = trasCambio;
@@ -52,5 +54,15 @@ export async function borrarEvento(id: number): Promise<Resultado> {
     const r = plan.borrarEvento(db(), id);
     refrescar();
     return { ok: true, mensaje: r ? `Evento eliminado: ${r.nombre}` : "Ese evento ya no estaba" };
+  });
+}
+
+/** El cierre de un mes ya visto deja de ofrecerse en el panel. */
+export async function marcarCierreVisto(mes: string): Promise<Resultado> {
+  return conSesion(() => {
+    if (!esMes(mes)) return { ok: false, error: "Mes no válido." };
+    db().insert(t.parametros).values({ clave: "cierre_visto", valor: mes }).onConflictDoUpdate({ target: t.parametros.clave, set: { valor: mes } }).run();
+    revalidatePath("/");
+    return { ok: true, mensaje: "Cierre marcado como visto" };
   });
 }

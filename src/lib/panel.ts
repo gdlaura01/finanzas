@@ -95,40 +95,6 @@ export function proximosEventos(eventos: EventoPanel[], movs: Mov[], hoyISO: str
   return out.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.nombre.localeCompare(b.nombre, "es")).slice(0, n);
 }
 
-export type Aviso = { tono: "oliva" | "ambar" | "rojo"; clave: string; titulo: string; texto: string; enlace?: { href: string; texto: string } };
-
-/** Avisos del mes: carga por revisar, grupos cerca o por encima del presupuesto y eventos a menos de dos semanas. */
-export function avisosPanel(p: { filas: FilaGrupo[]; proximos: Proximo[]; porRevisar: number; nombreMes: string; eur: (c: number) => string; pct: (x: number) => string }): Aviso[] {
-  const out: Aviso[] = [];
-  if (p.porRevisar > 0)
-    out.push({
-      tono: "oliva",
-      clave: "revisar",
-      titulo: `${p.porRevisar} apuntes de la carga inicial`,
-      texto: "pendientes de clasificar.",
-      enlace: { href: "/revisar", texto: "Revisarlos por lotes" },
-    });
-  for (const f of p.filas) {
-    if (f.presupuesto > 0 && f.real / f.presupuesto >= 0.8) {
-      const pasado = f.real > f.presupuesto;
-      out.push({
-        tono: pasado ? "rojo" : "ambar",
-        clave: `g${f.grupo.id}`,
-        titulo: f.grupo.nombre,
-        texto: `va por el ${p.pct(f.real / f.presupuesto)} de su presupuesto de ${p.nombreMes}: ${p.eur(f.real)} de ${p.eur(f.presupuesto)}.${pasado ? ` Te has pasado ${p.eur(f.real - f.presupuesto)}.` : ""}`,
-      });
-    } else if (f.presupuesto === 0 && f.real > 0) {
-      out.push({ tono: "rojo", clave: `g${f.grupo.id}`, titulo: f.grupo.nombre, texto: `tiene ${p.eur(f.real)} de gasto en un mes sin presupuesto.` });
-    }
-  }
-  for (const e of p.proximos) {
-    if (e.dias >= 14) continue;
-    const cuando = e.dias <= 0 ? (e.dia ? "es hoy" : "es este mes") : e.dias === 1 ? "es mañana" : `es en ${e.dias} días`;
-    out.push({ tono: "ambar", clave: `e${e.id}`, titulo: e.nombre, texto: `${cuando}. Previsto ${p.eur(e.importePrevistoCent)}, gastado ${p.eur(e.gastado)}.` });
-  }
-  return out;
-}
-
 /** Ingresos y gasto total de cada mes de un año. */
 export function serieAnual(movs: Mov[], anio: number) {
   return Array.from({ length: 12 }, (_, i) => {

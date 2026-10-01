@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  avisosPanel,
   cierreMes,
   comprasSinCargar,
   fechaReferencia,
@@ -15,7 +14,6 @@ import {
   type GrupoPanel,
   type MovPanel,
 } from "./panel";
-import { eur } from "./formato";
 
 const g = (id: number, nombre: string, presupuestoCent: number | null, extra: Partial<GrupoPanel> = {}): GrupoPanel => ({
   id, nombre, color: "#000", activo: true, presupuestoCent, esDinamico: presupuestoCent == null, ...extra,
@@ -56,17 +54,6 @@ describe("resumen del panel", () => {
     // El archivado sale porque tiene gasto este mes
     expect(por.Viejo.real).toBe(500);
     expect(filasGrupos(GRUPOS, EVENTOS, [], "2026-10").some((x) => x.grupo.nombre === "Viejo")).toBe(false);
-  });
-  it("avisa de grupos cerca o por encima del presupuesto y de eventos cercanos", () => {
-    const filas = filasGrupos(GRUPOS, EVENTOS, [...movs, mov({ tipo: "gasto", importeCent: 8000, grupoId: 10 })], "2026-10");
-    const proximos = proximosEventos(EVENTOS, movs, "2026-10-01");
-    const a = avisosPanel({ filas, proximos, porRevisar: 3, nombreMes: "octubre", eur, pct: (x) => `${Math.round(x * 100)} %` });
-    expect(a[0]).toMatchObject({ tono: "oliva", titulo: "3 apuntes de la carga inicial" });
-    expect(a.find((x) => x.titulo === "Otros")).toMatchObject({ tono: "rojo" });
-    expect(a.find((x) => x.titulo === "Otros")!.texto).toContain("Te has pasado 3,01 €");
-    expect(a.find((x) => x.titulo === "Cumple Ana")!.texto).toBe("es en 11 días. Previsto 40,00 €, gastado 35,00 €.");
-    expect(a.find((x) => x.titulo === "Cumple Luis")!.texto).toMatch(/^es hoy/);
-    expect(a.some((x) => x.titulo === "Navidad")).toBe(false);
   });
 });
 
