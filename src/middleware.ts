@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_SESION, verificarSesion } from "@/lib/auth/sesion";
+import { origenDe } from "@/lib/red";
 
 /** Toda la app exige sesión, salvo la pantalla de acceso. */
 export async function middleware(req: NextRequest) {
@@ -9,14 +10,15 @@ export async function middleware(req: NextRequest) {
   const enEntrar = pathname === "/entrar";
 
   if (!email && !enEntrar) {
-    const url = new URL("/entrar", req.url);
+    const url = new URL("/entrar", origenDe(req.headers));
     if (pathname !== "/") url.searchParams.set("desde", pathname + search);
     return NextResponse.redirect(url);
   }
-  if (email && enEntrar) return NextResponse.redirect(new URL("/", req.url));
+  if (email && enEntrar) return NextResponse.redirect(new URL("/", origenDe(req.headers)));
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|svg|ico|webmanifest)$).*)"],
+  // El manifiesto y el icono se piden sin sesión al añadir la app a la pantalla de inicio
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|icono/|manifest.webmanifest|.*\\.(?:png|jpg|svg|ico|webmanifest)$).*)"],
 };

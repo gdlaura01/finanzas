@@ -26,6 +26,22 @@ npm run build && npm start   # versión optimizada
 
 `npm run dev` prepara la base de datos antes de arrancar; `npm start` aplica las migraciones pendientes.
 
+## Usar desde el móvil (en casa)
+
+La app sigue viviendo en tu ordenador; el móvil solo la abre a través de la wifi de casa.
+
+1. Arranca la app en el ordenador (`npm run build && npm start`). Al arrancar escribe la dirección para el móvil, por ejemplo `http://192.168.1.20:3000`; también la tienes en **Ajustes › Copia y datos › Usar desde el móvil**.
+2. Con el móvil en la **misma wifi**, abre esa dirección y entra con tu correo y contraseña.
+3. Para tenerla como una app: en Android (Chrome), menú ⋮ › **Añadir a pantalla de inicio**; en iPhone (Safari), botón Compartir › **Añadir a pantalla de inicio**.
+
+Si el móvil no llega:
+
+- **Cortafuegos del ordenador**: la primera vez, Windows o macOS preguntan si Node.js puede aceptar conexiones. Permítelo **solo en redes privadas** (Windows: marca «Redes privadas» y que la wifi de casa esté como red privada). En Linux con `ufw`: `sudo ufw allow from 192.168.0.0/16 to any port 3000`.
+- **Otra dirección**: el router puede cambiar la dirección del ordenador. Mira la nueva al arrancar o en Ajustes. Para que no cambie, reserva una IP fija para el ordenador en el router.
+- La app solo responde mientras el ordenador esté encendido con ella abierta.
+
+Seguridad: fuera de casa no se puede llegar a ella (tu router no la expone a internet; no abras puertos en él). Dentro de casa va por `http` sin cifrar, así que úsala solo en tu wifi, que debe tener contraseña; nunca en una wifi pública. La contraseña de la app y el bloqueo tras 5 intentos fallidos la protegen de otros aparatos de la red. **Conectar con Google Drive** se hace desde el ordenador (`http://localhost:3000`): Google no admite dar el permiso desde otra dirección.
+
 ## Variables de entorno (`.env.local`)
 
 | Variable | Para qué |
