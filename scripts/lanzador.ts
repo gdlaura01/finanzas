@@ -130,7 +130,9 @@ async function main() {
   const marcaInstalado = join(DATOS, ".lanzador-instalado");
   const lock = huella(join(RAIZ, "package-lock.json"));
   if (!existsSync(join(RAIZ, "node_modules")) || leer(marcaInstalado) !== lock) {
-    paso("Instalar dependencias", "npm install --no-audit --no-fund");
+    // Exactamente lo del package-lock y sin scripts de instalación: better-sqlite3 trae su binario,
+    // y en Windows npm se empeña en compilarlo (pide Visual Studio) si se le deja
+    paso("Instalar dependencias", "npm ci --ignore-scripts --no-audit --no-fund");
     writeFileSync(marcaInstalado, lock);
   }
   const marcaCompilado = join(DATOS, ".lanzador-compilado");

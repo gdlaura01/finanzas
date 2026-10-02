@@ -11,11 +11,13 @@ Aplicación de finanzas personales para usar en tu propio ordenador. Los datos v
 ## Instalación
 
 ```bash
-npm install
+npm ci --ignore-scripts      # instala las dependencias (sin compilar nada; ver nota)
 cp .env.example .env.local   # crea tu archivo de configuración
 npm run crear-acceso         # pide tu correo y contraseña y guarda el acceso en .env.local
 npm run db:preparar          # crea data/finanzas.db, aplica migraciones y carga la configuración inicial
 ```
+
+En Windows usa PowerShell y `Copy-Item .env.example .env.local` en lugar de `cp`. No hace falta Visual Studio: la base de datos (better-sqlite3) trae su binario ya compilado. Con un `npm install` normal, npm intenta compilarlo igualmente en Windows y falla pidiendo Visual Studio; por eso se instala con `--ignore-scripts`.
 
 ## Arranque
 
