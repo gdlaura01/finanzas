@@ -35,6 +35,7 @@ export type OpcionesCarga = {
   mesRecurrentes: string;
 };
 
+export const NOTA_RESUMEN_MENSUAL = "Del resumen mensual de tu hoja";
 export const NOTA_FECHA_SUPUESTA = "Fecha supuesta (día 1): indica el día real en que entró";
 
 const esFecha = (c: Celda): c is string => typeof c === "string" && /^\d{4}-\d{2}-\d{2}$/.test(c);
@@ -100,12 +101,12 @@ export function leerHojaSeguimiento(libro: Libro, o: OpcionesCarga): { movimient
       if (ahorro + inversion > 0)
         movs.push({
           ...base, fechaCompra: dia1, fechaCargo: dia1, concepto: "Traspaso a Trade Republic (ahorro + inversión)", tipo: "ahorro", medio: "trade_republic",
-          importeCent: cent(ahorro + inversion), cuentaOrigen: "imagin", cuentaDestino: "ahorro_tr", notas: "Del resumen mensual de tu hoja",
+          importeCent: cent(ahorro + inversion), cuentaOrigen: "imagin", cuentaDestino: "ahorro_tr", notas: NOTA_RESUMEN_MENSUAL,
         });
       if (inversion > 0)
         movs.push({
           ...base, fechaCompra: dia1, fechaCargo: dia1, concepto: "Paso de Ahorro TR a Inversión TR", tipo: "interno", medio: "trade_republic",
-          importeCent: cent(inversion), cuentaOrigen: "ahorro_tr", cuentaDestino: "inversion_tr", notas: "Del resumen mensual de tu hoja",
+          importeCent: cent(inversion), cuentaOrigen: "ahorro_tr", cuentaDestino: "inversion_tr", notas: NOTA_RESUMEN_MENSUAL,
         });
     }
   }

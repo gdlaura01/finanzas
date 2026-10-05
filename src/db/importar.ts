@@ -4,7 +4,7 @@ import type { BaseDatos } from ".";
 import * as t from "./schema";
 import { normalizar } from "@/lib/reglas";
 import { buscarDuplicado, type Comparable } from "@/lib/importar/duplicados";
-import type { MovCarga } from "@/lib/importar/hoja";
+import { NOTA_FECHA_SUPUESTA, NOTA_RESUMEN_MENSUAL, type MovCarga } from "@/lib/importar/hoja";
 import type { DatosMovimiento } from "@/lib/movimientos";
 
 export const cargaInicialHecha = (db: BaseDatos) =>
@@ -12,9 +12,14 @@ export const cargaInicialHecha = (db: BaseDatos) =>
 
 export function existentesComparables(db: BaseDatos): Comparable[] {
   return db
-    .select({ id: t.movimientos.id, fechaCargo: t.movimientos.fechaCargo, importeCent: t.movimientos.importeCent, concepto: t.movimientos.concepto, tipo: t.movimientos.tipo })
+    .select({ id: t.movimientos.id, fechaCargo: t.movimientos.fechaCargo, importeCent: t.movimientos.importeCent, concepto: t.movimientos.concepto, tipo: t.movimientos.tipo, origen: t.movimientos.origen, notas: t.movimientos.notas, pendiente: t.movimientos.pendienteRevision })
     .from(t.movimientos)
-    .all();
+    .all()
+    .map(({ origen, notas, pendiente, ...m }) => ({
+      ...m,
+      // Del resumen mensual de la hoja, o con la fecha aún supuesta: sin día real
+      delMes: origen === "carga_inicial" && (notas === NOTA_RESUMEN_MENSUAL || (pendiente && notas === NOTA_FECHA_SUPUESTA)),
+    }));
 }
 
 /**

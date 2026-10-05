@@ -8,7 +8,7 @@ import { Campo } from "@/components/ui/campo";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { crearReglaImportacion, guardarLineas, leerExtracto, proponerExtracto, type ExtractoLeido } from "@/app/(app)/importar/acciones";
-import { eur, fecha, fechaCorta } from "@/lib/formato";
+import { eur, fecha, fechaCorta, nombreMes } from "@/lib/formato";
 import { patronSugerido, type Mapeo, type Propuesta } from "@/lib/importar/extracto";
 import { cn } from "@/lib/utils";
 
@@ -211,9 +211,12 @@ export function ImportarExtracto({ grupos }: { grupos: Grupo[] }) {
                       {p.linea.concepto}
                     </span>
                     <span className="num text-xs text-tinta-3 lg:hidden">{fecha(p.linea.fechaCargo)} · </span>
+                    {p.aviso && !p.duplicado && <span className="rounded-full bg-ambar-claro px-2 py-px text-[11px] font-bold text-[#4f3a10]">{p.aviso}</span>}
                     {p.duplicado && (
                       <span className={cn("rounded-full px-2 py-px text-[11px] font-bold", p.duplicado.tipo === "exacto" ? "bg-burdeos-claro text-[#4e1717]" : "bg-ambar-claro text-[#4f3a10]")}>
-                        {p.duplicado.tipo === "exacto" ? "ya está" : "posible duplicado"} de {p.duplicado.con.concepto} {fechaCorta(p.duplicado.con.fechaCargo)}
+                        {p.duplicado.parte
+                          ? `parte de ${p.duplicado.con.concepto} (${eur(p.duplicado.con.importeCent)}, ${nombreMes(p.duplicado.con.fechaCargo.slice(0, 7))})`
+                          : `${p.duplicado.tipo === "exacto" ? "ya está" : "posible duplicado"} de ${p.duplicado.con.concepto} ${fechaCorta(p.duplicado.con.fechaCargo)}`}
                       </span>
                     )}
                   </span>

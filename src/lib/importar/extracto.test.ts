@@ -61,7 +61,6 @@ describe("propuestas", () => {
       ["gasto", null],
     ]);
     expect(claseDeLinea({ concepto: "TRASPASO DESDE REVOLUT", importeCent: 4000 }).clase).toBe("retirada");
-    expect(claseDeLinea({ concepto: "TOP-UP REVOLUT", importeCent: -15000 }).clase).toBe("hucha");
   });
   it("grupo por lo aprendido o por las reglas; si no, el de por defecto", () => {
     expect(p[0]).toMatchObject({ grupoId: 1, etiqueta: "Trabajo", fuente: "regla" });
@@ -81,5 +80,76 @@ describe("propuestas", () => {
   it("patrón para una regla nueva", () => {
     expect(patronSugerido("COMPRA TARJ. CAFE CENTRAL 4432")).toBe("cafe central");
     expect(patronSugerido("PAGO MOVIL EN MERCADONA, S.A.")).toBe("mercadona");
+  });
+});
+
+describe("extracto de Imagin", () => {
+  // Mismo formato que el CSV que descarga Imagin (datos inventados)
+  const IMAGIN = [
+    "Concepto;Fecha;Importe;Saldo",
+    "PAGO TRANSFERENCIAS;05/10/2026;-150,00EUR;1.219,55EUR",
+    "NOMINA (TRF);05/10/2026;1.331,91EUR;1.369,55EUR",
+    "PAYPAL *SHEINCOM;02/10/2026;-23,01EUR;37,64EUR",
+    "Revolut**0317*;12/09/2026;-12,95EUR;462,90EUR",
+    "Revolut**0317*;01/09/2026;12,95EUR;475,85EUR",
+    "ahorro;01/09/2026;-800,00EUR;666,50EUR",
+    "inversion;11/05/2026;-200,00EUR;595,80EUR",
+    "REINT.CAJERO;27/08/2026;-50,00EUR;254,83EUR",
+    "INGRESO CAJERO;07/04/2026;310,00EUR;614,19EUR",
+    "BIZUM RECIBIDO;21/09/2026;2,50EUR;252,52EUR",
+    "",
+  ].join("\r\n");
+  const tabla = leerCSV(IMAGIN);
+  const m = proponerMapeo(tabla);
+  const { lineas, errores } = aplicarMapeo(tabla, m);
+
+  it("lee los importes con «EUR» pegado y la única fecha como compra y cargo", () => {
+    expect(m).toMatchObject({ concepto: 0, fecha: 1, importe: 2, fechaValor: null, formatoFecha: "dma" });
+    expect(errores).toEqual([]);
+    expect(lineas[0]).toMatchObject({ fechaCompra: "2026-10-05", fechaCargo: "2026-10-05", concepto: "PAGO TRANSFERENCIAS", importeCent: -15000 });
+    expect(lineas[1].importeCent).toBe(133191);
+  });
+  it("cada línea, con el tipo que corresponde a tu forma de llevar las cuentas", () => {
+    const p = proponerLineas(lineas, { existentes: [], aprendido: new Map(), reglas: [], grupoPorDefecto: 10 });
+    expect(p.map((x) => [x.linea.concepto, x.clase, x.entradaComo, x.aceptar])).toEqual([
+      ["PAGO TRANSFERENCIAS", "hucha", null, true],
+      ["NOMINA (TRF)", "entrada", "ingreso", true],
+      ["PAYPAL *SHEINCOM", "gasto", null, true],
+      ["Revolut**0317*", "gasto", null, true],
+      ["Revolut**0317*", "entrada", "devolucion", true],
+      ["ahorro", "ahorro", null, true],
+      ["inversion", "ahorro", null, true],
+      ["REINT.CAJERO", "gasto", null, false],
+      ["INGRESO CAJERO", "entrada", "ingreso", true],
+      ["BIZUM RECIBIDO", "entrada", "devolucion", true],
+    ]);
+    expect(p[7].aviso).toMatch(/efectivo/);
+  });
+  it("el ahorro y la nómina ya apuntados se reconocen como duplicados", () => {
+    const existentes = [
+      { id: 1, fechaCargo: "2026-09-01", importeCent: 80000, concepto: "Traspaso a Trade Republic", tipo: "ahorro" },
+      { id: 2, fechaCargo: "2026-10-04", importeCent: 133191, concepto: "Nómina", tipo: "ingreso" },
+      { id: 3, fechaCargo: "2026-10-05", importeCent: 15000, concepto: "Traspaso a la hucha", tipo: "traspaso" },
+    ];
+    const p = proponerLineas(lineas, { existentes, aprendido: new Map(), reglas: [], grupoPorDefecto: 10 });
+    expect(p.filter((x) => x.duplicado).map((x) => x.linea.concepto)).toEqual(["PAGO TRANSFERENCIAS", "NOMINA (TRF)", "ahorro"]);
+  });
+  it("lo del resumen mensual de tu hoja (sin día real) se reconoce en todo el mes y por sumas", () => {
+    const existentes = [
+      { id: 1, fechaCargo: "2026-05-01", importeCent: 106553, concepto: "Nómina", tipo: "ingreso", delMes: true },
+      { id: 2, fechaCargo: "2026-05-01", importeCent: 60000, concepto: "Traspaso a Trade Republic", tipo: "ahorro", delMes: true },
+      { id: 3, fechaCargo: "2026-06-01", importeCent: 70000, concepto: "Traspaso a Trade Republic", tipo: "ahorro", delMes: true },
+    ];
+    const csv = ["Concepto;Fecha;Importe;Saldo", "NOMINA (TRF);04/05/2026;1.065,53EUR;0", "ahorro;05/05/2026;-400,00EUR;0", "inversion;11/05/2026;-200,00EUR;0", "ahorro;02/06/2026;-500,00EUR;0", "ahorro;20/06/2026;-100,00EUR;0"].join("\n");
+    const t2 = leerCSV(csv);
+    const p = proponerLineas(aplicarMapeo(t2, proponerMapeo(t2)).lineas, { existentes, aprendido: new Map(), reglas: [], grupoPorDefecto: 10 });
+    expect(p.map((x) => [x.linea.concepto, x.duplicado?.con.id ?? null, !!x.duplicado?.parte, x.aceptar])).toEqual([
+      ["NOMINA (TRF)", 1, false, false],
+      ["ahorro", 2, true, false],
+      ["inversion", 2, true, false],
+      // En junio no suman los 700 €: son nuevas
+      ["ahorro", null, false, true],
+      ["ahorro", null, false, true],
+    ]);
   });
 });

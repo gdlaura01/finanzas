@@ -5,7 +5,7 @@
 import { esFechaISO, importeACampo, leerImporte } from "@/lib/formato";
 import { clasificarEntrada, type ClaseForm, type EntradaFormulario } from "@/lib/movimientos";
 import { normalizar, sugerir, type Regla } from "@/lib/reglas";
-import { buscarDuplicado, type Comparable, type Duplicado } from "./duplicados";
+import { buscarDuplicado, buscarPartes, type Comparable, type Duplicado } from "./duplicados";
 import type { Celda } from "./hoja";
 
 /* ---------- CSV ---------- */
@@ -162,19 +162,34 @@ export type Propuesta = {
   etiqueta: string | null;
   fuente: "aprendido" | "regla" | "nada";
   duplicado: Duplicado | null;
-  /** Se guarda si la dejas marcada. Las que parecen duplicadas llegan desmarcadas. */
+  /** Por qué llega desmarcada sin ser un duplicado (sacar efectivo). */
+  aviso: string | null;
+  /** Se guarda si la dejas marcada. Las que parecen duplicadas, o con aviso, llegan desmarcadas. */
   aceptar: boolean;
 };
 
-/** Qué es cada línea por su signo y su concepto. */
-export function claseDeLinea(l: Pick<LineaExtracto, "concepto" | "importeCent">): { clase: ClaseForm; entradaComo: "ingreso" | "devolucion" | null } {
+/** Qué es cada línea por su signo y su concepto (con los nombres que usa Imagin). */
+export function claseDeLinea(l: Pick<LineaExtracto, "concepto" | "importeCent">): {
+  clase: ClaseForm;
+  entradaComo: "ingreso" | "devolucion" | null;
+  /** Por qué llega desmarcada aunque no sea un duplicado. */
+  aviso?: string;
+} {
   const k = normalizar(l.concepto);
   if (l.importeCent < 0) {
-    if (/trade republic/.test(k)) return { clase: "ahorro", entradaComo: null };
-    if (/revolut/.test(k)) return { clase: "hucha", entradaComo: null };
+    // Tus traspasos a Trade Republic se llaman «ahorro» o «inversion»
+    if (/trade republic|^ahorro$|^inversion$/.test(k)) return { clase: "ahorro", entradaComo: null };
+    // El traspaso mensual a la hucha de Revolut
+    if (/^pago transferencias$/.test(k)) return { clase: "hucha", entradaComo: null };
+    // Sacar efectivo no es gasto: lo que pagas con él lo apuntas como gasto en efectivo
+    if (/reint\.? ?cajero|reintegro|retirada (de )?efectivo/.test(k))
+      return { clase: "gasto", entradaComo: null, aviso: "sacar efectivo: no es un gasto (cuentan tus gastos en efectivo)" };
+    // Las recargas con la tarjeta de Revolut («Revolut**0317*») son compras
     return { clase: "gasto", entradaComo: null };
   }
-  if (/revolut/.test(k)) return { clase: "retirada", entradaComo: null };
+  if (/ingreso (en )?cajero|ingreso efectivo/.test(k)) return { clase: "entrada", entradaComo: "ingreso" };
+  // Un traspaso de vuelta desde la hucha; las devoluciones de la tarjeta Revolut**… son devoluciones
+  if (/revolut/.test(k) && !/revolut\*/.test(k)) return { clase: "retirada", entradaComo: null };
   return { clase: "entrada", entradaComo: clasificarEntrada(l.concepto) };
 }
 
@@ -195,8 +210,8 @@ export function proponerLineas(
   ctx: { existentes: Comparable[]; aprendido: Map<string, { grupoId: number; etiqueta: string | null }>; reglas: Regla[]; grupoPorDefecto: number },
 ): Propuesta[] {
   const usados = new Set<Comparable>();
-  return lineas.map((linea) => {
-    const { clase, entradaComo } = claseDeLinea(linea);
+  const propuestas: Propuesta[] = lineas.map((linea) => {
+    const { clase, entradaComo, aviso } = claseDeLinea(linea);
     const conGrupo = clase === "gasto" || (clase === "entrada" && entradaComo === "devolucion");
     const s = conGrupo ? sugerir(linea.concepto, ctx.aprendido, ctx.reglas) : null;
     const modelo = comoMovimiento({ clase, entradaComo, linea });
@@ -208,9 +223,17 @@ export function proponerLineas(
       etiqueta: s?.etiqueta ?? null,
       fuente: s?.fuente ?? "nada",
       duplicado,
-      aceptar: !duplicado,
+      aviso: aviso ?? null,
+      aceptar: !duplicado && !aviso,
     };
   });
+  // Varias líneas que juntas son el total de un mes de tu hoja (p. ej. dos traspasos que suman el ahorro del mes)
+  const modelos = propuestas.map((p) => ({ ...comoMovimiento(p), fechaCargo: p.linea.fechaCargo }));
+  const libres = propuestas.flatMap((p, i) => (p.duplicado ? [] : [i]));
+  for (const [i, con] of buscarPartes(modelos, libres, ctx.existentes, usados)) {
+    propuestas[i] = { ...propuestas[i], duplicado: { tipo: "posible", con, parte: true }, aceptar: false };
+  }
+  return propuestas;
 }
 
 /** Lo que se manda a validar, como si lo hubieras escrito en el formulario. */
