@@ -8,6 +8,13 @@
       "when": 1790846427416,
       "tag": "0000_inicial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1791218311279,
+      "tag": "0001_reglas_banco",
+      "breakpoints": true
     }
   ]
 }
