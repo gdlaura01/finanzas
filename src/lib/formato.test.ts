@@ -28,6 +28,8 @@ describe("importes", () => {
     expect(leerImporte("1.234,56")).toBe(123456);
     expect(leerImporte("1234.56")).toBe(123456);
     expect(leerImporte("1.234")).toBe(123400);
+    expect(leerImporte("-1.331,91EUR")).toBe(-133191);
+    expect(leerImporte("+2,50 €")).toBe(250);
     expect(leerImporte(" 21,78 € ")).toBe(2178);
     expect(leerImporte("−3")).toBe(-300);
     expect(leerImporte("")).toBeNull();

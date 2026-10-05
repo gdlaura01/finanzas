@@ -20,7 +20,8 @@ export function eur(cent: number, decimales: 0 | 2 = 2) {
  * Acepta «12,5», «1.234,56», «1234.56», «1.234», «−3» y «12 €». Vacío → null; ilegible → NaN.
  */
 export function leerImporte(texto: string | null | undefined): number | null {
-  let s = String(texto ?? "").trim().replace(/[\s€]/g, "").replace(/[−–]/g, "-");
+  // Admite el símbolo o el código de la moneda pegados («-150,00EUR», el formato de Imagin) y un «+» delante
+  let s = String(texto ?? "").trim().replace(/[\s€]|eur/gi, "").replace(/[−–]/g, "-").replace(/^\+/, "");
   if (!s) return null;
   if (s.includes(",")) s = s.replace(/\./g, "").replace(",", ".");
   else if (/^-?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, "");

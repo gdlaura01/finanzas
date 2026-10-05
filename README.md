@@ -134,6 +134,13 @@ En **Movimientos › Importar extracto** (o en `/importar`):
 
 - **Carga inicial** (una sola vez): descarga tu hoja «Seguimiento Financiero» como Excel y súbela. Se cargan la nómina y los traspasos a Trade Republic del resumen mensual, los gastos fijos hasta que empiezan los recurrentes, los gastos variables y la gasolina con la fecha real de tu hoja de gasolina; los repostajes que no aparecen en la cuenta se marcan como efectivo. Lo que ya estuviera en la app no se repite. Después, en **Revisar carga inicial**, confirmas el día de cada nómina y clasificas los gastos por concepto (una decisión vale para todos los apuntes iguales), con excepciones por apunte y «Deshacer».
 - **Extracto del banco** (CSV o Excel): las columnas se proponen solas y puedes cambiarlas; se recuerdan con un nombre («Imagin») para la próxima vez. La fecha de la operación es la de compra y la fecha valor, la de cargo. Cada línea llega con su tipo y una propuesta de grupo (lo aprendido de tus apuntes o tus reglas). Lo que se parece a algo que ya tienes (mismo importe y cargo a 2 días o menos) llega desmarcado como «posible duplicado». Si corriges un grupo, te ofrece crear una regla.
+- **Extracto de Imagin**: el CSV que descarga Imagin (`Concepto;Fecha;Importe;Saldo`, importes como `-150,00EUR`) se lee tal cual. Cómo se propone cada línea:
+  - «ahorro», «inversion» o «Trade Republic» → ahorro a Trade Republic;
+  - «PAGO TRANSFERENCIAS» → a la hucha;
+  - «Revolut\*\*…» → gasto (son compras con la tarjeta de Revolut);
+  - «REINT.CAJERO» (sacar efectivo) → desmarcada: no es un gasto, ya cuentan tus gastos en efectivo;
+  - «INGRESO CAJERO» → ingreso; la nómina, ingreso; el resto de entradas (bizums, reembolsos), devolución.
+- **Con la carga inicial**: la nómina con fecha supuesta y los traspasos del resumen mensual de tu hoja no tienen día real, así que se reconocen en cualquier día del mes, y también cuando varias líneas del banco suman el total del mes («ahorro» 400 € + «inversion» 200 € = traspaso de 600 €): llegan desmarcadas como «parte de…».
 
 Los archivos se leen en tu ordenador y no se guardan; `*.xlsx`, `*.csv` y `data/importar/` están en `.gitignore`.
 
