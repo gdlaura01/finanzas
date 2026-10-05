@@ -21,7 +21,7 @@ describe("base de datos", () => {
     expect(cuenta(db, t.eventos)).toBe(10);
     expect(cuenta(db, t.recurrentes)).toBe(8);
     expect(cuenta(db, t.atajos)).toBe(7);
-    expect(cuenta(db, t.reglasImportacion)).toBe(11);
+    expect(cuenta(db, t.reglasImportacion)).toBe(15);
     expect(cuenta(db, t.intereses)).toBe(9);
     const regalos = db.select().from(t.grupos).where(eq(t.grupos.nombre, "Regalos")).get()!;
     expect(regalos.esDinamico).toBe(true);
