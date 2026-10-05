@@ -80,6 +80,11 @@ export function sembrar(db: BaseDatos) {
       .run();
 
     const reglas: [string, string, string | null][] = [
+      // Cómo escribe Imagin algunos conceptos (también en la migración 0001_reglas_banco)
+      ["^h m$|\\beci\\b", "Ropa", null],
+      ["viryi nails|^bk", "Caprichos", null],
+      ["anthropic", "IA", null],
+      ["econoil|plenoil|petroil|^eess |^e\\. ?s\\. ", "Gasolina", "Trabajo"],
       ["gasolina|petroprix|repsol|cepsa", "Gasolina", "Trabajo"],
       ["udemy|curso", "Formación", "Suscripción"],
       ["claude|openai|chatgpt", "IA", null],
