@@ -172,6 +172,15 @@ sqlite3 data/finanzas.db ".backup 'data/copias/finanzas-$(date +%F).db'"
 
 También puedes descargar en cualquier momento el libro `.xlsx` con los datos calculados desde **Ajustes › Copia y datos**.
 
+### Empezar de cero
+
+En **Ajustes › Copia y datos › Empezar de cero**, «Vaciar datos» (hay que escribir VACIAR para confirmar):
+
+- **Borra** todos los gastos, ingresos, ahorros y traspasos, las importaciones (también la carga inicial), los saldos y cuadres, los intereses de Ahorro TR y los valores de Inversión TR.
+- **Conserva** grupos, presupuestos, calendario, recurrentes, atajos, reglas, tu acceso y la conexión con Drive.
+- Deja cada cuenta con un saldo de partida de **0 € el 31/12 del año anterior**: lo que importes después se suma desde ahí. Para que los saldos coincidan con los reales, cuadra cada cuenta con el banco al terminar.
+- Antes de borrar guarda una copia completa en `data/copias/antes-de-vaciar-<fecha>.db`. Para volver atrás, restáurala como cualquier copia (arriba).
+
 ## Copia en Google Drive
 
 Tras cada cambio (con unos segundos de margen para agrupar), la app genera un libro `.xlsx` con cinco hojas de valores ya calculados (Resumen, Movimientos, Presupuesto, Anuales y Ahorro) y **sobrescribe siempre el mismo archivo** de tu Drive por su `fileId`. Si no hay internet o Drive falla, lo deja pendiente y reintenta con espera creciente (10 s, 20 s, 40 s… hasta 30 min); al arrancar la app retoma lo pendiente. Nunca impide guardar. El indicador de abajo a la izquierda (arriba en el móvil) dice si está sincronizado, pendiente o con error, con un botón para reintentar.

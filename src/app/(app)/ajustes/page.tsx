@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { Download, ExternalLink, Smartphone } from "lucide-react";
 import { BotonesDrive } from "@/components/app/acciones-drive";
+import { VaciarDatos } from "@/components/app/vaciar-datos";
 import { Cabecera } from "@/components/app/marco";
 import { ListaAtajos, ListaGrupos, ListaRecurrentes, ListaReglas, NuevaRegla, NuevoAtajo, NuevoGrupo, NuevoRecurrente, ProbarRegla } from "@/components/ajustes/listas";
 import { Button } from "@/components/ui/button";
@@ -225,6 +226,16 @@ function CopiaYDatos({ drive, host }: { drive?: string; host: string }) {
               <Download /> Descargar el libro (.xlsx)
             </Link>
           </Button>
+        </section>
+
+        <section className="rounded-xl border border-linea-suave bg-papel p-5 sm:p-6">
+          <h2 className="text-xl font-bold">Empezar de cero</h2>
+          <p className="mt-1 text-sm text-tinta-2">
+            Borra todos los movimientos y deja las cuentas a 0 €, conservando tu configuración (grupos, presupuestos, calendario, recurrentes, atajos y reglas). Antes guarda una copia.
+          </p>
+          <div className="mt-3">
+            <VaciarDatos />
+          </div>
         </section>
     </>
   );
