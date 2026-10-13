@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aFormulario, aplicarMapeo, claseDeLinea, leerCSV, leerFecha, patronSugerido, proponerLineas, proponerMapeo } from "./extracto";
+import { saldosDelBanco, aFormulario, aplicarMapeo, claseDeLinea, leerCSV, leerFecha, patronSugerido, proponerLineas, proponerMapeo } from "./extracto";
 import { validarMovimiento } from "@/lib/movimientos";
 
 // Extracto inventado con forma de banco español
@@ -20,7 +20,7 @@ describe("leer el extracto", () => {
     expect(tabla[2][2]).toBe("COMPRA TARJ. REPSOL 1234; MADRID");
   });
   it("propone el mapeo por los nombres de las columnas", () => {
-    expect(proponerMapeo(tabla)).toEqual({ filaCabecera: 1, fecha: 0, fechaValor: 1, concepto: 2, importe: 3, cargo: null, abono: null, formatoFecha: "dma" });
+    expect(proponerMapeo(tabla)).toEqual({ filaCabecera: 1, fecha: 0, fechaValor: 1, concepto: 2, importe: 3, cargo: null, abono: null, formatoFecha: "dma", saldo: 4 });
   });
   it("la fecha de operación es la de compra y la fecha valor, la de cargo", () => {
     const { lineas, errores } = aplicarMapeo(tabla, proponerMapeo(tabla));
@@ -151,5 +151,31 @@ describe("extracto de Imagin", () => {
       ["ahorro", null, false, true],
       ["ahorro", null, false, true],
     ]);
+  });
+  it("saldo del banco: partida antes de la primera línea y saldo tras la última", () => {
+    const tabla2 = leerCSV(IMAGIN);
+    // Las 10 líneas del ejemplo no forman una cadena de saldos (son sueltas): solo el final
+    expect(aplicarMapeo(tabla2, proponerMapeo(tabla2)).saldos).toEqual({ apertura: null, cierre: { fecha: "2026-10-05", saldoCent: 121955 } });
+  });
+});
+
+describe("saldos del banco", () => {
+  // Imagin: lo más reciente arriba; dos líneas el mismo día, en el orden del archivo
+  const desc = [
+    { fecha: "2026-10-05", importeCent: -15000, saldoCent: 121955 },
+    { fecha: "2026-10-05", importeCent: 133191, saldoCent: 136955 },
+    { fecha: "2026-10-02", importeCent: -2301, saldoCent: 3764 },
+  ];
+  it("con lo más reciente arriba", () => {
+    expect(saldosDelBanco(desc)).toEqual({ apertura: { fecha: "2026-10-01", saldoCent: 6065 }, cierre: { fecha: "2026-10-05", saldoCent: 121955 } });
+  });
+  it("con lo más reciente abajo, igual", () => {
+    expect(saldosDelBanco([...desc].reverse())).toEqual(saldosDelBanco(desc));
+  });
+  it("si falta una línea en medio, la partida no cuadra y solo se da el saldo final", () => {
+    expect(saldosDelBanco([desc[0], desc[2]])).toEqual({ apertura: null, cierre: { fecha: "2026-10-05", saldoCent: 121955 } });
+  });
+  it("sin columna de saldo, nada", () => {
+    expect(saldosDelBanco([])).toBeNull();
   });
 });

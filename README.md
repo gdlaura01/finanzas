@@ -140,6 +140,7 @@ En **Movimientos › Importar extracto** (o en `/importar`):
   - «Revolut\*\*…» → gasto (son compras con la tarjeta de Revolut);
   - «REINT.CAJERO» (sacar efectivo) → desmarcada: no es un gasto, ya cuentan tus gastos en efectivo;
   - «INGRESO CAJERO» → ingreso; la nómina, ingreso; el resto de entradas (bizums, reembolsos), devolución.
+- **Cuadrar Imagin con el extracto**: si el extracto trae la columna «Saldo» (el de Imagin la trae), al importar puedes cuadrar Imagin con el saldo real del banco: el de después de la última línea y, si el extracto cuadra de principio a fin, también el de antes de la primera (como partida). Así el saldo de Imagin es el real aunque dejes líneas sin importar, como sacar efectivo. Si vuelves a subir el mismo extracto, el botón solo cuadra.
 - **Con la carga inicial**: la nómina con fecha supuesta y los traspasos del resumen mensual de tu hoja no tienen día real, así que se reconocen en cualquier día del mes, y también cuando varias líneas del banco suman el total del mes («ahorro» 400 € + «inversion» 200 € = traspaso de 600 €): llegan desmarcadas como «parte de…».
 
 Los archivos se leen en tu ordenador y no se guardan; `*.xlsx`, `*.csv` y `data/importar/` están en `.gitignore`.
@@ -178,7 +179,7 @@ En **Ajustes › Copia y datos › Empezar de cero**, «Vaciar datos» (hay que 
 
 - **Borra** todos los gastos, ingresos, ahorros y traspasos, las importaciones (también la carga inicial), los saldos y cuadres, los intereses de Ahorro TR y los valores de Inversión TR.
 - **Conserva** grupos, presupuestos, calendario, recurrentes, atajos, reglas, tu acceso y la conexión con Drive.
-- Deja cada cuenta con un saldo de partida de **0 € el 31/12 del año anterior**: lo que importes después se suma desde ahí. Para que los saldos coincidan con los reales, cuadra cada cuenta con el banco al terminar.
+- Deja cada cuenta con un saldo de partida de **0 € el 31/12 del año anterior**: lo que importes después se suma desde ahí. Imagin se cuadra sola al importar su extracto (con la casilla «Cuadrar Imagin»); Ahorro TR, Inversión TR y la hucha, cuádralas a mano con lo que veas en cada app.
 - Antes de borrar guarda una copia completa en `data/copias/antes-de-vaciar-<fecha>.db`. Para volver atrás, restáurala como cualquier copia (arriba).
 
 ## Copia en Google Drive

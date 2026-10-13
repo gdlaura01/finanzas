@@ -2,7 +2,7 @@
  * Extracto del banco (CSV o Excel). Funciones puras: leer la tabla, entender sus columnas
  * con un mapeo que puedes cambiar, y proponer cómo registrar cada línea.
  */
-import { esFechaISO, importeACampo, leerImporte } from "@/lib/formato";
+import { esFechaISO, importeACampo, leerImporte, sumarDias } from "@/lib/formato";
 import { clasificarEntrada, type ClaseForm, type EntradaFormulario } from "@/lib/movimientos";
 import { normalizar, sugerir, type Regla } from "@/lib/reglas";
 import { buscarDuplicado, buscarPartes, type Comparable, type Duplicado } from "./duplicados";
@@ -59,6 +59,13 @@ export type Mapeo = {
   cargo: number | null;
   abono: number | null;
   formatoFecha: "dma" | "amd" | "mda";
+  /** Saldo de la cuenta tras cada línea, si el banco lo da (los mapeos antiguos no lo tienen). */
+  saldo?: number | null;
+};
+
+const columnaSaldo = (cabecera: Celda[]) => {
+  const i = cabecera.map(texto).findIndex((x) => /^saldo/.test(x));
+  return i >= 0 ? i : null;
 };
 
 const texto = (c: Celda) => normalizar(String(c ?? ""));
@@ -96,6 +103,7 @@ export function proponerMapeo(tabla: Celda[][]): Mapeo {
     cargo: importe < 0 && cargo >= 0 ? cargo : null,
     abono: importe < 0 && abono >= 0 ? abono : null,
     formatoFecha,
+    saldo: columnaSaldo(tabla[filaCabecera] ?? []),
   };
 }
 
@@ -128,9 +136,15 @@ export type LineaExtracto = {
   importeCent: number;
 };
 
+export type SaldoBanco = { fecha: string; saldoCent: number };
+/** El saldo que da el banco: el de antes de la primera línea (partida) y el de después de la última. */
+export type SaldosExtracto = { apertura: SaldoBanco | null; cierre: SaldoBanco };
+
 export function aplicarMapeo(tabla: Celda[][], m: Mapeo) {
   const lineas: LineaExtracto[] = [];
   const errores: { fila: number; motivo: string }[] = [];
+  const colSaldo = m.saldo !== undefined ? m.saldo : columnaSaldo(tabla[m.filaCabecera] ?? []);
+  const conSaldo: { fecha: string; importeCent: number; saldoCent: number }[] = [];
   tabla.forEach((f, i) => {
     if (i <= m.filaCabecera || f.every((c) => c == null)) return;
     const fechaCompra = leerFecha(f[m.fecha], m.formatoFecha);
@@ -148,8 +162,28 @@ export function aplicarMapeo(tabla: Celda[][], m: Mapeo) {
     if (importe == null || Number.isNaN(importe) || importe === 0) return errores.push({ fila, motivo: "importe ilegible o cero" });
     if (!concepto) return errores.push({ fila, motivo: "sin concepto" });
     lineas.push({ fila, fechaCompra: fechaCargo && fechaCompra > fechaCargo ? fechaCargo : fechaCompra, fechaCargo: fechaCargo!, concepto, importeCent: importe });
+    const saldo = colSaldo != null ? leerNumero(f[colSaldo]) : null;
+    if (saldo != null && !Number.isNaN(saldo)) conSaldo.push({ fecha: fechaCargo!, importeCent: importe, saldoCent: saldo });
   });
-  return { lineas, errores };
+  return { lineas, errores, saldos: saldosDelBanco(conSaldo) };
+}
+
+/**
+ * Saldo inicial y final según el banco. El orden del archivo decide qué línea va antes dentro
+ * del mismo día (Imagin pone la más reciente arriba). La partida solo se da si cuadra:
+ * partida + todas las líneas = saldo final; si no (faltan líneas), solo el final.
+ */
+export function saldosDelBanco(filas: { fecha: string; importeCent: number; saldoCent: number }[]): SaldosExtracto | null {
+  if (!filas.length) return null;
+  const desc = filas[0].fecha > filas[filas.length - 1].fecha;
+  const orden = desc ? [...filas].reverse() : filas;
+  const primera = orden[0], ultima = orden[orden.length - 1];
+  const inicial = primera.saldoCent - primera.importeCent;
+  const cuadra = inicial + orden.reduce((a, x) => a + x.importeCent, 0) === ultima.saldoCent;
+  return {
+    apertura: cuadra ? { fecha: sumarDias(primera.fecha, -1), saldoCent: inicial } : null,
+    cierre: { fecha: ultima.fecha, saldoCent: ultima.saldoCent },
+  };
 }
 
 /* ---------- Propuestas ---------- */
