@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { crearReglaImportacion, guardarLineas, leerExtracto, proponerExtracto, type ExtractoLeido } from "@/app/(app)/importar/acciones";
 import { eur, fecha, fechaCorta, nombreMes } from "@/lib/formato";
-import { patronSugerido, type Mapeo, type Propuesta } from "@/lib/importar/extracto";
+import { patronSugerido, type Mapeo, type Propuesta, type SaldosExtracto } from "@/lib/importar/extracto";
 import { cn } from "@/lib/utils";
 
 type Grupo = { id: number; nombre: string; activo: boolean };
@@ -41,6 +41,8 @@ export function ImportarExtracto({ grupos }: { grupos: Grupo[] }) {
   const [nombreMapeo, setNombreMapeo] = useState("Imagin");
   const [error, setError] = useState("");
   const [correcciones, setCorrecciones] = useState<Correccion[]>([]);
+  const [saldos, setSaldos] = useState<SaldosExtracto | null>(null);
+  const [cuadrarImagin, setCuadrarImagin] = useState(true);
   const otros = grupos.find((g) => g.nombre === "Otros")?.id ?? grupos[0]?.id;
 
   function reiniciar() {
@@ -49,6 +51,7 @@ export function ImportarExtracto({ grupos }: { grupos: Grupo[] }) {
     setPropuestas(null);
     setErrores([]);
     setError("");
+    setSaldos(null);
     if (input.current) input.current.value = "";
   }
 
@@ -72,6 +75,8 @@ export function ImportarExtracto({ grupos }: { grupos: Grupo[] }) {
       setPropuestas(r.propuestas);
       setOriginales(r.propuestas);
       setErrores(r.errores);
+      setSaldos(r.saldos);
+      setCuadrarImagin(true);
       setError("");
     });
 
@@ -79,7 +84,7 @@ export function ImportarExtracto({ grupos }: { grupos: Grupo[] }) {
 
   const guardar = () =>
     iniciar(async () => {
-      const r = await guardarLineas({ archivo: extracto!.nombre, tabla: extracto!.tabla, mapeo: mapeo!, nombreMapeo, filasLeidas: propuestas!.length + errores.length, propuestas: propuestas! });
+      const r = await guardarLineas({ archivo: extracto!.nombre, tabla: extracto!.tabla, mapeo: mapeo!, nombreMapeo, filasLeidas: propuestas!.length + errores.length, propuestas: propuestas!, cuadrarCon: cuadrarImagin ? saldos : null });
       if (!r.ok) return setError(r.error ?? "No se ha podido importar.");
       avisar(r.mensaje);
       // Lo que corregiste respecto a la propuesta: te ofrezco una regla para la próxima vez
@@ -166,6 +171,7 @@ export function ImportarExtracto({ grupos }: { grupos: Grupo[] }) {
             {columna("m-importe", "Importe con signo", "importe", true)}
             {mapeo.importe == null && columna("m-cargo", "Cargos", "cargo", true)}
             {mapeo.importe == null && columna("m-abono", "Abonos", "abono", true)}
+            {columna("m-saldo", "Saldo (opcional)", "saldo", true)}
             <Campo id="m-formato" etiqueta="Formato de fecha">
               <Select id="m-formato" value={mapeo.formatoFecha} onChange={(e) => setMapeo({ ...mapeo, formatoFecha: e.target.value as Mapeo["formatoFecha"] })}>
                 <option value="dma">dd/mm/aaaa</option>
@@ -252,6 +258,23 @@ export function ImportarExtracto({ grupos }: { grupos: Grupo[] }) {
               );
             })}
           </ul>
+          {saldos && (
+            <label className="mt-4 flex items-start gap-2 rounded-lg border border-linea-suave bg-papel p-3 text-sm">
+              <input type="checkbox" className="mt-0.5 size-4 accent-oliva" checked={cuadrarImagin} onChange={(e) => setCuadrarImagin(e.target.checked)} />
+              <span>
+                <b>Cuadrar Imagin con el saldo del banco:</b> <span className="num">{eur(saldos.cierre.saldoCent)}</span> a {fecha(saldos.cierre.fecha)}
+                {saldos.apertura ? (
+                  <>
+                    {" "}
+                    y <span className="num">{eur(saldos.apertura.saldoCent)}</span> de partida a {fecha(saldos.apertura.fecha)}.
+                  </>
+                ) : (
+                  <>. <span className="text-tinta-3">(La partida no se usa: el extracto no cuadra de principio a fin, quizá le faltan líneas).</span></>
+                )}
+                <span className="block text-xs text-tinta-3">Así el saldo de Imagin es el real aunque dejes líneas sin importar, como sacar efectivo.</span>
+              </span>
+            </label>
+          )}
           <div className="mt-4 flex flex-wrap items-end justify-between gap-3 border-t border-linea-suave pt-3">
             <Campo id="m-nombre" etiqueta="Recordar estas columnas como" className="w-56">
               <Input id="m-nombre" value={nombreMapeo} onChange={(e) => setNombreMapeo(e.target.value)} placeholder="Imagin" />
@@ -260,8 +283,8 @@ export function ImportarExtracto({ grupos }: { grupos: Grupo[] }) {
               <Button variant="ghost" onClick={reiniciar}>
                 Cancelar
               </Button>
-              <Button disabled={enviando || !aceptadas} onClick={guardar}>
-                Importar {aceptadas} línea{aceptadas === 1 ? "" : "s"}
+              <Button disabled={enviando || (!aceptadas && !(saldos && cuadrarImagin))} onClick={guardar}>
+                {aceptadas || !(saldos && cuadrarImagin) ? `Importar ${aceptadas} línea${aceptadas === 1 ? "" : "s"}` : "Cuadrar Imagin"}
               </Button>
             </div>
           </div>

@@ -6,9 +6,12 @@ import * as imp from "@/db/importar";
 import { gruposActivos, todosLosGrupos, ultimosPorConcepto } from "@/db/movimientos";
 import * as t from "@/db/schema";
 import { conSesion, exigirSesion, type Resultado } from "@/lib/auth/exigir";
-import { esFechaISO, esMes } from "@/lib/formato";
+import { esFechaISO, esMes, eur, fecha, hoy } from "@/lib/formato";
 import { leerLibro } from "@/lib/importar/excel";
-import { aFormulario, aplicarMapeo, leerCSV, proponerLineas, proponerMapeo, type Mapeo, type Propuesta } from "@/lib/importar/extracto";
+import { aFormulario, aplicarMapeo, leerCSV, proponerLineas, proponerMapeo, type Mapeo, type Propuesta, type SaldosExtracto } from "@/lib/importar/extracto";
+import { cuadrar } from "@/db/cuentas";
+import { datosPanel } from "@/db/panel";
+import { saldos as calcularSaldos } from "@/lib/panel";
 import { leerHojaSeguimiento, type Celda } from "@/lib/importar/hoja";
 import { validarMovimiento } from "@/lib/movimientos";
 
@@ -139,21 +142,33 @@ export async function leerExtracto(f: FormData): Promise<{ ok: true; extracto: E
   }
 }
 
-export async function proponerExtracto(tabla: Celda[][], mapeo: Mapeo): Promise<{ ok: true; propuestas: Propuesta[]; errores: { fila: number; motivo: string }[] } | { ok: false; error: string }> {
+export async function proponerExtracto(
+  tabla: Celda[][],
+  mapeo: Mapeo,
+): Promise<{ ok: true; propuestas: Propuesta[]; errores: { fila: number; motivo: string }[]; saldos: SaldosExtracto | null } | { ok: false; error: string }> {
   try {
     await exigirSesion();
     const base = db();
-    const { lineas, errores } = aplicarMapeo(tabla, mapeo);
+    const { lineas, errores, saldos } = aplicarMapeo(tabla, mapeo);
     const aprendido = new Map(ultimosPorConcepto(base).filter((u) => u.tipo === "gasto" && u.grupoId).map((u) => [u.conceptoNorm, { grupoId: u.grupoId!, etiqueta: u.etiqueta }]));
     const otros = gruposActivos(base).find((g) => g.nombre === "Otros")?.id ?? gruposActivos(base)[0].id;
     const propuestas = proponerLineas(lineas, { existentes: imp.existentesComparables(base), aprendido, reglas: base.select().from(t.reglasImportacion).all(), grupoPorDefecto: otros });
-    return { ok: true, propuestas, errores };
+    return { ok: true, propuestas, errores, saldos };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
   }
 }
 
-export async function guardarLineas(p: { archivo: string; tabla: Celda[][]; mapeo: Mapeo; nombreMapeo: string | null; filasLeidas: number; propuestas: Propuesta[] }): Promise<Resultado> {
+export async function guardarLineas(p: {
+  archivo: string;
+  tabla: Celda[][];
+  mapeo: Mapeo;
+  nombreMapeo: string | null;
+  filasLeidas: number;
+  propuestas: Propuesta[];
+  /** Cuadrar Imagin con el saldo que da el banco (partida y final). */
+  cuadrarCon?: SaldosExtracto | null;
+}): Promise<Resultado> {
   return conSesion(() => {
     const base = db();
     const grupos = todosLosGrupos(base).map((g) => g.id);
@@ -171,9 +186,20 @@ export async function guardarLineas(p: { archivo: string; tabla: Celda[][]; mape
       const cabecera = (p.tabla[p.mapeo.filaCabecera] ?? []).map((x) => String(x ?? ""));
       mapeoId = imp.guardarMapeo(base, p.nombreMapeo.trim().slice(0, 40), { ...p.mapeo, cabecera });
     }
-    imp.guardarExtracto(base, { archivo: p.archivo, mapeoId, filasLeidas: p.filasLeidas, descartadas: p.propuestas.length - aceptadas.length, movimientos });
+    // Sin líneas nuevas (el mismo extracto otra vez) solo se cuadra
+    if (movimientos.length) imp.guardarExtracto(base, { archivo: p.archivo, mapeoId, filasLeidas: p.filasLeidas, descartadas: p.propuestas.length - aceptadas.length, movimientos });
+    // Primero la partida y luego el final: cada cuadre guarda lo que la app calculaba ese día
+    let cuadre = "";
+    for (const s of [p.cuadrarCon?.apertura, p.cuadrarCon?.cierre]) {
+      if (!s || !esFechaISO(s.fecha) || !Number.isInteger(s.saldoCent)) continue;
+      const d = datosPanel(base, s.fecha.slice(0, 7), hoy());
+      const calculado = calcularSaldos({ cuadres: d.cuadres, movs: d.movs, intereses: d.intereses, valoraciones: d.valoraciones }, s.fecha).imagin;
+      cuadrar(base, "imagin", s.fecha, s.saldoCent, calculado);
+      cuadre = ` · Imagin cuadrada: ${eur(s.saldoCent)} a ${fecha(s.fecha)}`;
+    }
     refrescar();
-    return { ok: true, mensaje: `${movimientos.length} movimiento${movimientos.length === 1 ? "" : "s"} importado${movimientos.length === 1 ? "" : "s"}` };
+    const n = movimientos.length;
+    return { ok: true, mensaje: n || !cuadre ? `${n} movimiento${n === 1 ? "" : "s"} importado${n === 1 ? "" : "s"}${cuadre}` : cuadre.slice(3) };
   });
 }
 
