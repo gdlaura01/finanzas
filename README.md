@@ -97,6 +97,7 @@ Hay un único usuario y no hay registro ni recuperación de contraseña.
 Solo lectura, para leer de un vistazo (de arriba abajo y de izquierda a derecha):
 
 - **Te queda por gastar**: ingresos − ahorro − lo traspasado a la hucha + lo sacado de ella − el gasto que paga Imagin (el efectivo y lo pagado con la hucha cuentan en su grupo, pero no restan de aquí). Avisa de las compras con tarjeta aún sin cargar.
+- **Nómina a final de mes**: la nómina que cobras **del día 20 en adelante cuenta para el mes siguiente**, porque es la que usas para vivirlo (la del 23 de octubre es la de noviembre). La de primeros de mes cuenta para su mes. Solo la nómina: los gastos, el ahorro y la hucha cuentan en el mes en que se cargan, y los saldos de las cuentas siguen el día real en que entra el dinero. El día de corte se puede cambiar con el parámetro `nomina_dia_corte`.
 - **Tus cuentas**: Imagin, Ahorro TR, Inversión TR y hucha, a hoy o al cierre del mes elegido.
 - **Avisos** (en el panel, nunca ventanas emergentes), de lo más grave a lo menos:
   - un grupo que pasa del 80 % de su presupuesto del mes (ámbar) o lo supera (burdeos, con cuánto te has pasado), o gasta sin presupuesto;

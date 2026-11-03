@@ -4,6 +4,7 @@
  * Todos los importes en céntimos.
  */
 import type { Cuenta, Medio, Tipo } from "@/db/schema";
+import { sumarMeses } from "./formato";
 
 export type Mov = {
   fechaCompra: string;
@@ -15,6 +16,8 @@ export type Mov = {
   etiqueta?: string | null;
   cuentaOrigen?: Cuenta | null;
   cuentaDestino?: Cuenta | null;
+  /** Mes al que cuenta, si no es el de su fecha de cargo (la nómina cobrada a final de mes). */
+  mesCuenta?: string;
 };
 
 export type Grupo = { id: number; presupuestoCent: number | null; esDinamico: boolean; efectivoPrevistoCent?: number };
@@ -28,7 +31,18 @@ export const normalizar = (s: string) =>
   s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/\s+/g, " ").trim();
 
 /** El mes de un movimiento lo decide su fecha de cargo. */
-export const mesDe = (m: Pick<Mov, "fechaCargo">) => m.fechaCargo.slice(0, 7);
+/** El mes de un movimiento lo decide su fecha de cargo, salvo la nómina cobrada a final de mes. */
+export const mesDe = (m: Pick<Mov, "fechaCargo" | "mesCuenta">) => m.mesCuenta ?? m.fechaCargo.slice(0, 7);
+
+/** Desde este día del mes, la nómina cuenta para el mes siguiente: se cobra a final de mes para vivir el que viene. */
+export const DIA_CORTE_NOMINA = 20;
+
+export const esNomina = (m: { tipo: Tipo; concepto?: string | null }) => m.tipo === "ingreso" && /n[oó]mina/i.test(m.concepto ?? "");
+
+/** Pone a cada nómina cobrada desde el día de corte el mes siguiente; el resto, como está. */
+export function conMesDeCuentas<T extends Mov & { concepto?: string | null }>(movs: T[], diaCorte = DIA_CORTE_NOMINA): T[] {
+  return movs.map((m) => (esNomina(m) && Number(m.fechaCargo.slice(8, 10)) >= diaCorte ? { ...m, mesCuenta: sumarMeses(m.fechaCargo.slice(0, 7), 1) } : m));
+}
 
 export const movsDelMes = <T extends Mov>(movs: T[], mes: string) => movs.filter((m) => mesDe(m) === mes);
 

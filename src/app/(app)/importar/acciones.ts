@@ -135,7 +135,9 @@ export async function leerExtracto(f: FormData): Promise<{ ok: true; extracto: E
       const c = m.configuracion as Mapeo & { cabecera?: string[] };
       return JSON.stringify((tabla[c.filaCabecera] ?? []).map((x) => String(x ?? ""))) === JSON.stringify(c.cabecera ?? []);
     });
-    const mapeo = guardado ? (guardado.configuracion as Mapeo) : proponerMapeo(tabla);
+    const mapeo = guardado ? { ...(guardado.configuracion as Mapeo) } : proponerMapeo(tabla);
+    // Los mapeos guardados antes de leer el saldo no lo traen: se propone la columna
+    if (mapeo.saldo === undefined) mapeo.saldo = proponerMapeo(tabla).saldo;
     return { ok: true, extracto: { nombre: a.name, tabla: tabla.slice(0, 2000), mapeo, mapeoGuardado: guardado?.nombre ?? null } };
   } catch (e) {
     return { ok: false, error: (e as Error).message };
