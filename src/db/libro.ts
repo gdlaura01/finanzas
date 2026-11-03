@@ -1,7 +1,7 @@
 /** Reúne, ya calculado, todo lo que va al libro de respaldo de Drive. */
 import type { BaseDatos } from ".";
 import * as t from "./schema";
-import { leerParametros } from "./movimientos";
+import { leerParametros, movimientosPorMes } from "./movimientos";
 import { MESES, sumarMeses } from "@/lib/formato";
 import { CLASES, claseDe, NOMBRE_MEDIO, sentido } from "@/lib/movimientos";
 import { finDeMes, gastadoEnEvento, saldos } from "@/lib/panel";
@@ -11,7 +11,7 @@ export type DatosLibro = ReturnType<typeof datosLibro>;
 
 export function datosLibro(db: BaseDatos, hoyISO: string) {
   const grupos = db.select().from(t.grupos).orderBy(t.grupos.orden).all();
-  const movs = db.select().from(t.movimientos).orderBy(t.movimientos.fechaCargo, t.movimientos.id).all();
+  const movs = movimientosPorMes(db);
   const eventos = db.select().from(t.eventos).all();
   const p = leerParametros(db) as Record<string, number | string>;
   const datosSaldos = { cuadres: db.select().from(t.cuadres).all(), movs, intereses: db.select().from(t.intereses).all(), valoraciones: db.select().from(t.valoracionesInversion).all() };

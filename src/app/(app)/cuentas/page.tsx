@@ -5,7 +5,7 @@ import { AhorroApilado, BarrasMes, Tendencia, ValorFrenteAportado } from "@/comp
 import { BotonCuadrar, InteresEditable, QuitarValor, SelectorColchon } from "@/components/cuentas/interaccion";
 import { db } from "@/db";
 import { ultimoCuadre } from "@/db/cuentas";
-import { leerParametros } from "@/db/movimientos";
+import { leerParametros, movimientosPorMes } from "@/db/movimientos";
 import * as t from "@/db/schema";
 import type { Cuenta } from "@/db/schema";
 import { analisisInversion, COLOR_CUENTA, estadoColchon, flujosMes, haceDias, INFO_CUENTA, interesPrevisto, serieCuenta } from "@/lib/cuentas";
@@ -28,7 +28,7 @@ export default async function Cuentas({ searchParams }: { searchParams: Promise<
   const tasa = Number(p.tasa_ahorro_tr ?? 2.5);
   const d: DatosCuentas = {
     cuadres: base.select().from(t.cuadres).all(),
-    movs: base.select().from(t.movimientos).all(),
+    movs: movimientosPorMes(base),
     intereses: base.select().from(t.intereses).all(),
     valoraciones: base.select().from(t.valoracionesInversion).all(),
   };

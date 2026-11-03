@@ -5,7 +5,7 @@
 import { and, desc, eq, inArray, like, ne, sql } from "drizzle-orm";
 import type { BaseDatos } from ".";
 import * as t from "./schema";
-import { normalizar } from "@/lib/reglas";
+import { conMesDeCuentas, DIA_CORTE_NOMINA, normalizar } from "@/lib/reglas";
 import {
   automaticosPendientes,
   esDeMovimiento,
@@ -27,6 +27,12 @@ const ahora = () => new Date().toISOString();
 
 export function leerParametros(db: BaseDatos): Parametros & Record<string, unknown> {
   return Object.fromEntries(db.select().from(t.parametros).all().map((p) => [p.clave, p.valor]));
+}
+
+/** Todos los movimientos, con la nómina de final de mes en el mes al que cuenta (el siguiente). */
+export function movimientosPorMes(db: BaseDatos) {
+  const corte = Number(leerParametros(db).nomina_dia_corte) || DIA_CORTE_NOMINA;
+  return conMesDeCuentas(db.select().from(t.movimientos).orderBy(t.movimientos.fechaCargo, t.movimientos.id).all(), corte);
 }
 
 /* ---------- Movimientos ---------- */
