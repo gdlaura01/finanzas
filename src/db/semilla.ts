@@ -74,7 +74,7 @@ export function sembrar(db: BaseDatos) {
         { textoBoton: "Bizum enviado", concepto: "Bizum enviado", clase: "gasto", grupoId: id.Otros, medio: "imagin" },
         { textoBoton: "Bizum recibido", concepto: "Bizum recibido", clase: "entrada", entradaComo: "devolucion", grupoId: id.Otros, medio: "imagin" },
         { textoBoton: "Café / bar", concepto: "Bar", clase: "gasto", grupoId: id.Caprichos, medio: "imagin" },
-        { textoBoton: "Sacar de la hucha", concepto: "Retirada de la hucha", clase: "retirada", medio: "revolut" },
+        { textoBoton: "Hucha → Imagin", concepto: "Traspaso de la hucha a Imagin", clase: "retirada", medio: "revolut" },
         { textoBoton: "Claude", concepto: "Claude", clase: "gasto", grupoId: id.IA, etiqueta: "Suscripción", medio: "imagin", importeCent: 2178 },
       ].map((a, i) => ({ ...a, orden: i + 1 } as typeof t.atajos.$inferInsert)))
       .run();

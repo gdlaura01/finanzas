@@ -63,7 +63,7 @@ export function FormularioRegistro({ datos, fechaInicial }: { datos: DatosRegist
     setClaseRaw(c);
     setEntradaComo(null);
     if (cambiarMedio && !tocados.has("medio")) setMedio(MEDIO_POR_CLASE[c]);
-    if (c === "retirada" && !concepto) setConcepto("Retirada de la hucha");
+    if (c === "retirada" && !concepto) setConcepto("Traspaso de la hucha a Imagin");
     setErrores({});
   }
 
@@ -440,7 +440,8 @@ export function FormularioRegistro({ datos, fechaInicial }: { datos: DatosRegist
             )}
             {clase === "retirada" && (
               <p>
-                Se guardará como <b>retirada de la hucha</b>: el dinero vuelve de Revolut a Imagin y suma a lo que te queda este mes.
+                Se guardará como <b>traspaso de la hucha a Imagin</b>: el dinero pasa de Revolut a Imagin y suma a lo que te queda este mes. ¿Has pagado algo con
+                Revolut? Entonces es un <b>gasto</b> con «Pagado con dinero de la hucha».
               </p>
             )}
           </div>
