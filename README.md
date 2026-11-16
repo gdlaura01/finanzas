@@ -88,7 +88,7 @@ Hay un único usuario y no hay registro ni recuperación de contraseña.
 - **Registrar**: botón flotante o tecla <kbd>N</kbd> desde cualquier pantalla. Eliges qué es (gasto, entrada de dinero, ahorro, a la hucha o sacar de la hucha) y escribes el importe en positivo. <kbd>Intro</kbd> guarda y deja el formulario listo para el siguiente.
 - **Fechas**: la de compra y la de cargo. El mes lo decide la de cargo; los botones «mismo día, +1, +2, +3» la ajustan.
 - **Entradas de dinero**: si el concepto parece una nómina se guardan como ingreso; si no, como devolución en su grupo. Puedes cambiarlo antes de guardar.
-- **Cubrir con la hucha**: en un gasto, apunta también una retirada de la hucha a Imagin por el mismo importe, enlazada al gasto: si lo editas, se ajusta; si lo borras, se borra.
+- **Pagado con dinero de la hucha**: en un gasto, marca esta casilla (equivale a medio «Revolut») cuando pagas con Revolut. Resta solo de la hucha, no toca Imagin ni lo que te queda de la nómina, y cuenta en su grupo. Si alguna vez pasas dinero de la hucha a Imagin, apúntalo aparte como «Sacar de la hucha». (Los gastos antiguos con una retirada enlazada se arreglan editándolos y poniendo medio «Revolut»: la retirada se borra sola.)
 - **Atajos y propuestas**: los atajos más usados salen primero. Al escribir un concepto conocido se propone lo de la última vez (o lo de tus reglas), sin tocar lo que ya hayas cambiado.
 - **Movimientos**: en *Pendientes* confirmas los recurrentes del mes con la fecha y el importe reales, los omites o cambias su día previsto. La tabla se filtra, se ordena y se edita en la propia fila.
 
