@@ -45,7 +45,6 @@ export function FormularioRegistro({ datos, fechaInicial }: { datos: DatosRegist
   const [etiqueta, setEtiqueta] = useState("");
   const [notas, setNotas] = useState("");
   const [cuentaDestino, setCuentaDestino] = useState<Cuenta>("ahorro_tr");
-  const [cubrir, setCubrir] = useState(false);
   const [atajoId, setAtajoId] = useState<number | null>(null);
   const [tocados, setTocados] = useState<Set<Tocado>>(new Set());
   const [pista, setPista] = useState("");
@@ -128,7 +127,6 @@ export function FormularioRegistro({ datos, fechaInicial }: { datos: DatosRegist
     setEtiqueta("");
     setNotas("");
     setCuentaDestino("ahorro_tr");
-    setCubrir(false);
     setAtajoId(null);
     setTocados(new Set());
     setErrores({});
@@ -144,7 +142,6 @@ export function FormularioRegistro({ datos, fechaInicial }: { datos: DatosRegist
       grupoId: conGrupo ? grupoId : "",
       entradaComo: clase === "entrada" ? como : "",
       cuentaDestino: clase === "ahorro" ? cuentaDestino : "",
-      cubrirConHucha: clase === "gasto" && cubrir ? "on" : "",
       atajoId: atajoId ? String(atajoId) : "",
     };
     for (const [k, v] of Object.entries(valores)) f.set(k, v);
@@ -393,18 +390,24 @@ export function FormularioRegistro({ datos, fechaInicial }: { datos: DatosRegist
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="text-sm text-tinta-2" aria-live="polite">
-            {clase === "gasto" &&
-              (medio === "revolut" ? (
-                <p>Pagado desde Revolut: sale de la hucha y no resta de Imagin.</p>
-              ) : (
-                <label className="flex items-start gap-2">
-                  <input type="checkbox" className="mt-1 size-4 accent-oliva" checked={cubrir} onChange={(e) => setCubrir(e.target.checked)} />
-                  <span>
-                    <b>Cubrir este gasto con dinero de la hucha</b>{" "}
-                    <span className="text-tinta-3">Apunta también una retirada de la hucha a Imagin por el mismo importe, así no resta de tu nómina.</span>
-                  </span>
-                </label>
-              ))}
+            {clase === "gasto" && (
+              // Pagar con la hucha es pagar con Revolut: sale solo de la hucha, sin pasar por Imagin
+              <label className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  className="mt-1 size-4 accent-oliva"
+                  checked={medio === "revolut"}
+                  onChange={(e) => {
+                    setMedio(e.target.checked ? "revolut" : "imagin");
+                    tocar("medio");
+                  }}
+                />
+                <span>
+                  <b>Pagado con dinero de la hucha</b>{" "}
+                  <span className="text-tinta-3">Con Revolut: resta solo de la hucha, no toca Imagin ni lo que te queda de la nómina. Cuenta en su grupo como cualquier gasto.</span>
+                </span>
+              </label>
+            )}
             {clase === "entrada" && (
               <p>
                 {como === "devolucion" ? (
