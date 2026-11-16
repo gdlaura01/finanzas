@@ -15,6 +15,13 @@
       "when": 1791218311279,
       "tag": "0001_reglas_banco",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1794866945541,
+      "tag": "0002_atajo_hucha_imagin",
+      "breakpoints": true
     }
   ]
 }

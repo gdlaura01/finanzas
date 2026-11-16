@@ -21,7 +21,7 @@ const TIPOS = {
   devolucion: { texto: "Devolución", clase: "entrada", como: "devolucion" },
   ahorro: { texto: "Ahorro", clase: "ahorro", como: null },
   hucha: { texto: "A la hucha", clase: "hucha", como: null },
-  retirada: { texto: "Sacado de la hucha", clase: "retirada", como: null },
+  retirada: { texto: "Hucha → Imagin", clase: "retirada", como: null },
 } as const;
 type TipoLinea = keyof typeof TIPOS;
 const tipoDe = (p: Propuesta): TipoLinea => (p.clase === "entrada" ? (p.entradaComo === "ingreso" ? "ingreso" : "devolucion") : p.clase);

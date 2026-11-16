@@ -103,7 +103,7 @@ export default async function Panel({ searchParams }: { searchParams: Promise<{ 
               </div>
               {r.retiradas > 0 && (
                 <div className="flex justify-between gap-3">
-                  <dt className="text-[#f3e4d0]">Sacado de la hucha</dt>
+                  <dt className="text-[#f3e4d0]">De la hucha a Imagin</dt>
                   <dd>+{eur(r.retiradas)}</dd>
                 </div>
               )}
@@ -190,7 +190,7 @@ export default async function Panel({ searchParams }: { searchParams: Promise<{ 
             <Kpi etiqueta="Gasto sin gasolina" valor={eur(r.gastoSinGasolina)} secundario />
             <Kpi etiqueta="Pagado en efectivo" valor={eur(r.gastoEfectivo)} secundario />
             {r.gastoRevolut > 0 && <Kpi etiqueta="Pagado con la hucha" valor={eur(r.gastoRevolut)} secundario />}
-            {r.retiradas > 0 && <Kpi etiqueta="Sacado de la hucha" valor={eur(r.retiradas)} secundario />}
+            {r.retiradas > 0 && <Kpi etiqueta="De la hucha a Imagin" valor={eur(r.retiradas)} secundario />}
           </div>
         </section>
 

@@ -85,7 +85,7 @@ Hay un único usuario y no hay registro ni recuperación de contraseña.
 
 ## Registrar movimientos
 
-- **Registrar**: botón flotante o tecla <kbd>N</kbd> desde cualquier pantalla. Eliges qué es (gasto, entrada de dinero, ahorro, a la hucha o sacar de la hucha) y escribes el importe en positivo. <kbd>Intro</kbd> guarda y deja el formulario listo para el siguiente.
+- **Registrar**: botón flotante o tecla <kbd>N</kbd> desde cualquier pantalla. Eliges qué es (gasto, entrada de dinero, ahorro, a la hucha o «Hucha → Imagin») y escribes el importe en positivo. <kbd>Intro</kbd> guarda y deja el formulario listo para el siguiente.
 - **Fechas**: la de compra y la de cargo. El mes lo decide la de cargo; los botones «mismo día, +1, +2, +3» la ajustan.
 - **Entradas de dinero**: si el concepto parece una nómina se guardan como ingreso; si no, como devolución en su grupo. Puedes cambiarlo antes de guardar.
 - **Pagado con dinero de la hucha**: en un gasto, marca esta casilla (equivale a medio «Revolut») cuando pagas con Revolut. Resta solo de la hucha, no toca Imagin ni lo que te queda de la nómina, y cuenta en su grupo. Si alguna vez pasas dinero de la hucha a Imagin, apúntalo aparte como «Sacar de la hucha». (Los gastos antiguos con una retirada enlazada se arreglan editándolos y poniendo medio «Revolut»: la retirada se borra sola.)

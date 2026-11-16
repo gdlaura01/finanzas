@@ -14,7 +14,7 @@ export const CLASES_FORM = {
   entrada: "Entrada de dinero",
   ahorro: "Ahorro",
   hucha: "A la hucha",
-  retirada: "Sacar de la hucha",
+  retirada: "Hucha → Imagin",
 } as const;
 export type ClaseForm = keyof typeof CLASES_FORM;
 
@@ -25,7 +25,7 @@ export const CLASES = {
   ingreso: "Ingreso",
   ahorro: "Ahorro",
   traspaso: "A la hucha",
-  retirada: "Sacado de la hucha",
+  retirada: "Hucha → Imagin",
   interno: "Entre cuentas",
 } as const;
 export type Clase = keyof typeof CLASES;
